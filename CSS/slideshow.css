@@ -1,0 +1,62 @@
+@import url("common.css");
+
+/* スクロールバー非表示　*/
+html {
+    height: 150px;
+    overflow-y: scroll;
+    -ms-overflow-style: none;    /* IE, Edge 対応 */
+    scrollbar-width: none;       /* Firefox 対応 */
+}
+html::-webkit-scrollbar {  /* Chrome, Safari 対応 */
+    display:none;
+}
+html{
+    margin: 0px;
+    padding: 0px;
+}
+body{
+    margin: 0px;
+    padding: 0px;
+}
+.imageshow{
+    margin: 0px;
+    padding: 0px;
+}
+
+.imagebox{
+    margin: 0px;
+    padding:0px;
+    margin-bottom: auto;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex; /* 要素をflexboxに対応させる */
+    align-items: center; /* 縦方向の中央揃え */
+    justify-content: center; /* 横方向の中央揃え */
+    text-align: center;
+    overflow: hidden;
+}
+.imagebox a{
+    margin: 0px;
+    padding: 0px;
+}
+.imagebox img{
+    margin: 0px;
+    padding: 0px;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    text-align: center;
+}
+
+.center{
+    text-align: center;
+}
+
+.contloller .left{
+    text-align: left;
+    float: left;
+}
+.contloller .right{
+    text-align: right;
+}

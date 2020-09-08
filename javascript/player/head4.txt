@@ -1,0 +1,5 @@
+DGPlayer.off('pause', onplay);
+
+DGPlayer.on('play', onplay = function(){
+    if (player)
+        player.disconnect();

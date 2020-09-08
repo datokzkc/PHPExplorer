@@ -1,0 +1,30 @@
+<div class="avatar">
+<img src="/HTTP/img/player/fallback_album_art.png">
+</div>
+
+<span class="title">Unknown Title</span>
+<span class="artist">Unknown Artist</span>
+
+<div class="button"></div>
+
+<div class="volume">
+<img src="/HTTP/img/player/volume_high.png">
+<div class="track">
+    <div class="progress"></div>
+    <div class="handle"></div>
+</div>
+<img src="/HTTP/img/player/volume_low.png">
+</div>
+
+<div class="seek">
+<span>0:00</span>
+<div class="track">
+    <div class="loaded"></div>
+    <div class="progress"></div>
+</div>
+<span>-0:00</span>
+</div>
+<div class="file_button"></div>
+<span class="file_description">ほかのファイルを選ぶこともできます</span>
+</div>
+<script src="http://audiocogs.org/codecs/js/aurora.js"></script>

@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="http://audiocogs.org/dgplayer/player.css" />
+
+<script>
+    var unsupported;
+    if (!window.Audio || !('mozWriteAudio' in new Audio()) && !window.AudioContext && !window.webkitAudioContext) {
+        unsupported = true;
+        document.body.classList.add("unsupported");
+    }
+    </script>
+    <div id="unsupported">
+    ブラウザが非対応です。
+    </div>
+    
+
+<script src="http://audiocogs.org/dgplayer/player.js"></script>
+<script src="http://audiocogs.org/codecs/js/auroraplayer.js"></script>

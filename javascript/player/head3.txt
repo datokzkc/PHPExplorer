@@ -1,0 +1,18 @@
+<script type="text/javascript">
+    // Chrome doesn't support changing the sample rate, and uses whatever the hardware supports.
+    // We cheat here.  Instead of resampling on the fly, we're currently just loading two different
+    // files based on common hardware sample rates.
+    var _sampleRate = (function() {
+        var AudioContext = (window.AudioContext || window.webkitAudioContext);
+        if (!AudioContext)
+            return 44100;
+        
+        return new AudioContext().sampleRate;
+    }());
+    
+    (function(DGPlayer){
+        if (unsupported) return;
+        
+        DGPlayer.volume = 100;
+        
+        var player, onplay;
