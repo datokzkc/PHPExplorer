@@ -29,6 +29,12 @@ chdir(ROOT); //ディレクトリの場所の初期化
 echo"<h1>「".$search."」の検索結果</h1>\n";
 
 echo "<a href = \"./db_all.php\" >データベース登録の全表示へ戻る</a><br>\n";
+
+echo "<br>\n";
+echo "<form action=\"./db_search.php\" method=\"get\" class=\"search_form\">\n";
+echo "<input type=\"text\" name=\"search\" value=\"{$search}\">\n";
+echo "<button type=\"submit\">検索</button>\n";
+echo "</form>\n";
 ?>
 </div>
 <div class ="covershow">
@@ -81,10 +87,15 @@ $search_re = mb_convert_encoding($search,"UTF-8");
         '*' => '\\*',
         '+' => '\\+',
         '{' => '\\{',
-        '}' => '\\}'
+        '}' => '\\}',
+        // and検索対策 スペースはAND検索に置換
+        '　' => ' ',
+        '  ' => ' ',
+        ' ' => ')(?=.*'
     ];
 $search_re = str_replace(array_keys($replace), array_values($replace), $search_re);
-$dirlist = preg_grep('/.*'.$search_re.'.*/',$dirlist);
+//大文字小文字は区別せず検索
+$dirlist = preg_grep('/(?=.*'.$search_re.').*/i',$dirlist);
 
 if(count($dirlist)== 0){
     $dirlist[] = "\n--@//nothing";
