@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>
-メディア再生ページ
+メディア再生ページ(HLS)
 </title>
 <link rel="stylesheet" type="text/css" href="/HTTP/CSS/mediaplay.css">
 <!-- jQuery -->
@@ -18,6 +18,10 @@ include 'root_dir.php';
 setlocale(LC_ALL, 'ja_JP.UTF-8');
 include 'db-func.php';
 include 'file-func.php';
+
+//変換したHLSを格納する場所。このディレクトリは必ず存在するように事前に作成しておく。
+//最後のスラッシュは記載しない。ROOTから見た相対パス(?)で記載すること。
+define("HLS_SAVE_PATH",".folder/Video/HLS");
 
 if(isset($_GET['path'])){
     $path = $_GET['path'];
@@ -36,6 +40,7 @@ $name = basename(realpath($path));
 echo"<h1>「{$name}」の再生画面</h1><br>\n";
 $link = substr(realpath($path),strlen(ROOT));
 echo "<a href = \"/{$link}\" >直接表示(/{$link})</a><br><br>\n";
+echo "<a href = \"./mediaplay.php?path=".rawurlencode(($link))."\"> 通常のメディア再生ページへ</a><br><br>\n";
 
 echo "<a href = \"/".dirname($link)."\" >親ディレクトリを表示(/".dirname($link).")</a><br>\n";
 echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($link))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
@@ -84,63 +89,59 @@ echo realpath($path);
 </div class="tags">
 <br>
 <?php
-$link = substr(realpath($path),strlen(ROOT));
-if(is_video($path)){
-    echo "<video src=\"/".rawurlencode($link)."\" controls><p>このビデオはこのブラウザでは再生できません</p></video><br>\n";
-    echo "<br><a href = \"./hls-play.php?path=".rawurlencode($link)."\"> HLS(ストリーミング)再生</a><br>\n";
+//ここから変換処理　（何らかの変換処理がいるかも）
+$dir_id = get_dir_id(realpath($path));
+if ($dir_id < 0){
+    echo "<Error>Don't have Dir ID.<br>\n";
+    exit();
 }
-if(is_audio($path)){
-    echo "<audio src=\"/".rawurlencode($link)."\" controls id=\"audio_player\"><p>この音楽はこのブラウザでは再生できません</p></audio><br>\n";
+
+chdir(ROOT);
+$hls_file = HLS_SAVE_PATH."\\".$dir_id."\\".$dir_id.".m3u8" ;
+//$hls_file = ".folder/Video/tmp/hogehoge/output.m3u8";
+
+if(file_exists($hls_file) == false){
+
+    //とりあえずバッチファイル作って先実行で様子見。
+    //いろいろとできてないです、、
+    $fp = fopen("hls.bat", "a");
+    if(file_exists(dirname($hls_file)) == false){
+        //mkdir(dirname($hls_file));
+        @fwrite($fp,"cd ".ROOT."\n");
+        $hls_file = str_replace("/","\\",$hls_file);
+        @fwrite($fp,"mkdir ".dirname($hls_file)."\n");
+    }
+    $file_full_path = realpath($path);
+    $hls_full_path = realpath(dirname($hls_file));  //windows表記のパスに変えたかった、、
+    //変換には時間がかかるのでバックグラウンドで実行（&）を付ける
+    //変換が完了したとかは特に確認してないから、改善したほうがいい。↓参考
+    //https://qiita.com/kazukichi/items/c0516edb3898b469198b
+    //現在、m3u8ファイルがあるかで判断してるけど、変換処理の最初のほうでできちゃうからぶっちゃけダメ
+
+    //$cmd = "ffmpeg -i \"".$file_full_path."\" -c copy -f hls -hls_list_size 0 ".$hls_full_path."\\".$dir_id.".m3u8";
+    $cmd = "ffmpeg -i \"".$file_full_path."\" -c copy -f hls -hls_list_size 0 ".$hls_file;
+    //exec($cmd,$output_array,$result_code);
+    //$WshShell = new COM("WScript.Shell");
+    //$oExec = $WshShell->Run($cmd,0,false);
+    @fwrite($fp,$cmd."\n");
+    fclose($fp); 
+
+    //echo "<br>変換処理を開始しました。しばらくしてからリロードしてください<br>\n";
+    echo "<br>ごめん、準備できていないの、あきらめてください<br>\n";
 }
+else {
+
+    $hls_file_url = str_replace("\\","/",$hls_file);
+
+    //$hls_file_urlをurlエンコードすると、映像ファイルが読まれない（スラッシュまでもエンコードされるのが原因？）
+    //なので、$hls_file_urlには日本語とかが絶対入らないようにする。
+    echo "<video src=\"/".$hls_file_url."\" controls><p>このビデオはこのブラウザでは再生できません</p></video><br>\n";
+
+}
+
+chdir(dirname(__FILE__));
 ?>
-<script src="/HTTP/javascript/player/aurora.js"></script>
-<?php
-//.m4aはALACとする
-$is_load = false;
-$js_play = false;
-if(preg_match("/.*\.m4a$/i",$path) == 1 ||  preg_match("/.*\.alac$/i",$path) == 1){
-    echo "ALACメディアプレイヤー<br>\n";
-    echo "<script src=\"/HTTP/javascript/player/alac.js\" id=\"encoder\"></script>";
-    $is_load = true;
-    $js_play = true;
-}
-if(preg_match("/.*\.flac$/i",$path) == 1){
-    echo "FLACメディアプレイヤー\n";
-    echo "<script src=\"/HTTP/javascript/player/flac.js\" id=\"encoder\"></script>";
-    $is_load = true;
-    $js_play = true;
-}
 
-if(preg_match("/.*\.mp4$/i",$path) == 1 ||  preg_match("/.*\.aac$/i",$path) == 1){
-    echo "AACタグ情報\n";
-    echo "<script src=\"/HTTP/javascript/player/aac.js\" id=\"encoder\"></script>";
-    $is_load = true;
-}
-if(preg_match("/.*\.mp3$/i",$path) == 1){
-    echo "MP3タグ情報\n";
-    echo "<script src=\"/HTTP/javascript/player/mp3.js\" id=\"encoder\"></script>";    
-    $is_load = true;
-}
-else{
-    echo "<script id=\"encoder\"></script>"; 
-}
-
-?>
-<table id="musicinfo" hidden>
-<tr><td rowspan="4" class="longcel"><img src="/HTTP/img/player/fallback_album_art.png" id="album_cover"></td><td class="label">曲名</td><td id="music_title">Can't Read</td></tr>
-<tr><td class="label">アーティスト</td><td id="music_artist">Can't Read</td></tr>
-<tr><td class="label">アルバム</td><td id="album_title">Can't Read</td></tr>
-<tr><td class="label">アルバムアーティスト</td><td id="album_artist">Can't Read</td></tr>
-</table>
-
-<div id="volume_div" hidden>
-音量：　　<input type="range" id="volume" min="0" max="100" step="1" value="100">
-</div><div id="nowtime_div" hidden>
-再生位置：<input type="range" id="nowtime" min="0" max="1000" step="1" value="0" disabled>
-<p id="time"></p>
-<input type="button" id="playpause" value="再生" hidden>
-<input type="button" id="stop" value="停止" hidden>
-</div>
 <!--
     再生モード及び
     次の曲、プレイリスト編集画面へのリンク
@@ -204,6 +205,7 @@ echo realpath($path);?>
 
 <?php
 echo "<a href = \"/{$link}\" >直接表示(/{$link})</a><br><br>\n";
+echo "<a href = \"./mediaplay.php?path=".rawurlencode(($link))."\"> 通常のメディア再生ページへ</a><br><br>\n";
 
 echo "<a href = \"/".dirname($path)."\" >親ディレクトリを表示(/".dirname($path).")</a><br>\n";
 echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
@@ -213,29 +215,5 @@ echo "<a href = \"./covershow.php?path=".rawurlencode(dirname($path))."\"> 親�
 ?>
 </div>
 
-<script>
-<?php
-
-//文字列変換
-$link = mb_convert_encoding($link,"UTF-8");
-$replace = [
-    // '置換前の文字' => '置換後の文字',
-    '\\' => '\\\\',
-    "'" => "\\'",
-    '"' => '\\"',
-];
-$link_url = str_replace(array_keys($replace), array_values($replace), $link);
-echo "var media_link = \"/".$link_url."\";\n";
-echo "var play_mode = \"".$mode."\";\n";
-echo "var player_mode = \"nomal\";\n";
-if($is_load == true){
-    echo "player_mode = \"loadable\";\n";
-    if($js_play == true){
-        echo "player_mode = \"playable\";\n";
-    }
-}
-    readfile("HTTP/javascript/player.js");
-?>
-</script>
 </body>
 </html>

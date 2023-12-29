@@ -1,10 +1,13 @@
 <?php
 
-define("WRITE_DBIP","192.168.1.123");
+define("WRITE_DBIP","localhost");
 define("READ_DBIP","localhost");
 define("PI_ROOT","/misc/FAT2/");
 define("THIS_ROOT","D:\\");
 mb_internal_encoding("UTF-8");
+//下記defineを有効にするとパスを返す時/を\に変換してから返す
+define('USE_WINDOWS_PATH','USE_WINDOWS_PATH');
+
 
 //データベース接続
 // $db = new mysqli(WRITE_DBIP,"php","php","php_dir_tag");
@@ -70,6 +73,13 @@ rm_db_dir($path)
     ディレクトリ情報をデータベースから削除
     登録していない場合はfalseとehco
     成功したらtrue
+
+get_dir_id(String $dir_path){
+    データベースに登録されているディレクトリIDを返す
+    データベースに登録されていない場合は-1を返す
+get_dir_path(int $dir_id){
+    登録されているディレクトリIDからディレクトリのフルパスを返す
+    データベースに登録されていない場合はエラー終了する
 
 */
 function tagged_dir_list(String $srctag = "全て"){
@@ -680,6 +690,97 @@ function rm_db_dir(String $path){
     return true;
 }
 
+
+function get_dir_id(String $dir_path){
+    //登録されているディレクトリIDを返す
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(READ_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    //ディレクトリパス変換
+    $dir_path = str_replace(THIS_ROOT,PI_ROOT,$dir_path);
+    $dir_path = str_replace("\\","/",$dir_path);
+
+    //文字列変換
+    $dir_path = mb_convert_encoding($dir_path,"UTF-8");
+    $replace = [
+        // '置換前の文字' => '置換後の文字',
+        '\\' => '\\\\',
+        "'" => "\\'",
+        '"' => '\\"',
+    ];
+    $dir_path = str_replace(array_keys($replace), array_values($replace), $dir_path);
+
+    //ディレクトリのIDを検索
+    $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$dir_path."'";
+    if ($result = $db->query($sql)) {
+        if($result->num_rows == 0){
+            //ディレクトリがDBに登録されていない場合は-1を返す
+            $db->close();
+            return -1;
+        }
+        while ($row = $result->fetch_assoc()) {
+            $dir_id = $row["dir_id"];
+        }
+        // 結果セットを閉じる
+        $result->close();
+    }else{
+        echo "データベース検索エラー<br>\n";
+        exit();
+    }
+    return $dir_id;
+}
+
+
+function get_dir_path(int $dir_id){
+    //登録されているディレクトリIDからディレクトリのフルパスを返す
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(READ_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    //ディレクトリのIDを検索
+    $sql = "SELECT path FROM dirs_all WHERE dir_id = '".$dir_path."'";
+    if ($result = $db->query($sql)) {
+        if($result->num_rows == 0){
+            //ディレクトリIDが登録されていないときはエラーを表示する
+            $db->close();
+            echo "データベース検索エラー(不正なdir_id)<br>\n";
+            exit();
+        }
+        while ($row = $result->fetch_assoc()) {
+            $dir_path = $row["dir_id"];
+        }
+        // 結果セットを閉じる
+        $result->close();
+    }else{
+        echo "データベース検索エラー<br>\n";
+        exit();
+    }
+
+    //ディレクトリパス変換
+    $dir_path = str_replace(PI_ROOT,THIS_ROOT,$dir_path);
+    if (defined('USE_WINDOWS_PATH')) {
+    $dir_path = str_replace("/","\\",$dir_path);
+    }
+
+    return $dir_path;
+}
 
 
 ?>

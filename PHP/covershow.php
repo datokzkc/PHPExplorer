@@ -38,6 +38,17 @@ if(realpath($path)==ROOT){
     echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
     echo "<a href = \"./covershow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（代表画像表示）</a><br>\n";
 }
+
+// パスの中に[]で書かれた場所があればその内容での検索するリンクを追加
+$ptn = "/\[([^\]]*)\]/u";
+$ptn_match_res = preg_match_all($ptn, $path, $cell, PREG_PATTERN_ORDER);
+if ($ptn_match_res != false && $ptn_match_res != 0){
+    for($i = 0 ; $i < 5 ; $i = $i +1){
+        if(isset($cell[1][$i])){
+            echo "<a href = \"./db_search.php?search=".rawurlencode($cell[1][$i])."\"> DBから[".$cell[1][$i]."]を検索</a><br>\n";
+        }
+    }
+}
 ?>
 </div>
 <div class ="covershow">
@@ -387,6 +398,17 @@ if(realpath($path)==ROOT){
 }else{
     echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
     echo "<a href = \"./covershow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（代表画像表示）</a><br>\n";
+}
+
+// パスの中に[]で書かれた場所があればその内容での検索するリンクを追加
+$ptn = "/\[([^\]]*)\]/u";
+$ptn_match_res = preg_match_all($ptn, $path, $cell, PREG_PATTERN_ORDER);
+if ($ptn_match_res != false && $ptn_match_res != 0){
+    for($i = 0 ; $i < 5 ; $i = $i +1){
+        if(isset($cell[1][$i])){
+            echo "<a href = \"./db_search.php?search=".rawurlencode($cell[1][$i])."\"> DBから[".$cell[1][$i]."]を検索</a><br>\n";
+        }
+    }
 }
 ?>
 </div>
