@@ -165,6 +165,42 @@ if($dir_img == 0){
 //プレイリストに全追加ボタン
 echo "<button type=\"button\" id=\"tag_to_list_btn\">タグ条件「".$nowcondition_str."」の結果に含まれる曲でプレイリストを作成</button><br>\n";
 
+?>
+
+<form id="condition_form" action="" method="get">
+<label for="condition_form">検索条件入力</label><br>
+<label for="tag_input">含まれるタグ</label>
+<select id="tag_input" name="tag[]" multiple>
+<?php
+$alltag_list = all_tag_list();
+foreach($alltag_list as $tag){
+    echo "<option value=\"".$tag."\"";
+        if (in_array($tag,$addedtag_list)){
+            echo " selected"; 
+        }
+    echo "> ".$tag." </option>\n";
+}
+?>
+</select>
+<label for="notag_input">含まれないタグ</label>
+<select id="notag_input" name="notag[]" multiple>
+<?php
+foreach($alltag_list as $tag){
+    echo "<option value=\"".$tag."\"";
+        if (in_array($tag,$nottag_list)){
+            echo " selected"; 
+        }
+    echo "> ".$tag." </option>\n";
+}
+?>
+</select>
+<br>
+<input type="reset" value="リセット" > &nbsp;
+<input type="submit" value="実行" >
+</form>
+
+<?php
+
 //ページ移動
 echo "<div class=\"pageIndex\">\n";
 if($page_no < $max_page){
