@@ -107,7 +107,7 @@ foreach($taglist as $tag){
     }
     echo "<tr><td>";
     if($mode == 2){
-        if(($tagdirs = tagged_dir_list($tag)) != false){
+        if(($tagdirs = tagged_dir_list([$tag],[])) != false){
             $listlong = count($tagdirs);
             $top = mt_rand(0,$listlong-1);
             if(is_dir($tagdirs[$top]) == FALSE){
@@ -134,7 +134,7 @@ foreach($taglist as $tag){
     echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>";
 
     if($mode == 1){
-        if(($tagdirs = tagged_dir_list($tag)) != false){
+        if(($tagdirs = tagged_dir_list([$tag],[])) != false){
             $listlong = count($tagdirs);
         }else{
             $listlong = 0;

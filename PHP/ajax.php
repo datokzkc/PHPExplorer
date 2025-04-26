@@ -472,14 +472,18 @@ switch($mode){
             if(isset($_POST['tag'])){
                 $tag = $_POST['tag'];
             }else{
-                echo 'ERR';
-                exit();
+                $tag = array();
+            }
+            if(isset($_POST['notag'])){
+                $notag = $_POST['notag'];
+            }else{
+                $notag = array();
             }
         
-            if(tagged_dir_list ($tag) == false){
+            if(tagged_dir_list ($tag,$notag) === false){
                 $music_list = array();
             }else{
-                $dir_list = tagged_dir_list($tag);
+                $dir_list = tagged_dir_list($tag,$notag);
                 $music_list = array();
                 foreach($dir_list as $line){
                     $line = substr($line, strlen(ROOT));

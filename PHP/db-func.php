@@ -36,8 +36,9 @@ define('USE_WINDOWS_PATH','USE_WINDOWS_PATH');
 
 /*
 関数一覧
-tagged_dir_list ($tag) 
-    引数で指定したタグがついているディレクトリパスのリストを返す
+tagged_dir_list(array $addedtags = ["全て"], array $nottags = [])
+    $addedtags引数で指定したタグがついているディレクトリパスのリストを返す
+    ただし、$nottagsタグがついているディレクトリは除外する
     ※引数を指定しない場合は「全て」タグのついているものを返す
     ディレクトリが存在しないときはfalseを返す。
     存在しないタグを引数に取るとfalseとecho
@@ -82,50 +83,51 @@ get_dir_path(int $dir_id){
     データベースに登録されていない場合はエラー終了する
 
 */
-function tagged_dir_list(String $srctag = "全て"){
+function tagged_dir_list(array $addedtags = ["全て"], array $nottags = []){
     //引数設定されていない場合は"全て"タグで検索
     mb_internal_encoding("UTF-8");
 
     //データベース接続
     $db = new mysqli(READ_DBIP,"php","php","php_dir_tag");
     if($db->connect_error){
-    echo "データベース接続エラー<br>\n";
-    echo $db->connect_error;
-    exit();
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
     }else{
         $db->set_charset("utf8mb4");
     }
 
-    //文字列変換
-    $srctag = mb_convert_encoding($srctag,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $srctag = str_replace(array_keys($replace), array_values($replace), $srctag);
-
-    //tagのIDを検索
-    $sql = "SELECT tag_id FROM tags_all WHERE tag = '".$srctag."'";
-    if ($result = $db->query($sql)) {
-        if($result->num_rows == 0){
-            echo "エラー：".$srctag."はタグとして登録されていません<br>\n";
-            $db->close();
-            return false;
-        }
-        while ($row = $result->fetch_assoc()) {
-            $tag_id = $row["tag_id"];
-        }
-        // 結果セットを閉じる
-        $result->close();
-    }else{
-        echo "データベース検索エラー<br>\n";
-        exit();
+    //文字列前処理
+    foreach ($addedtags as $addedtag){
+        $addedtag = mb_convert_encoding($addedtag,"UTF-8");
+        $addedtag = $db->real_escape_string($addedtag);
+    }
+    foreach ($nottags as $nottag){
+        $nottag = mb_convert_encoding($nottag,"UTF-8");
+        $nottag = $db->real_escape_string($nottag);
     }
 
-    //tag_idが一致するパスをすべて取得
-    $sql = "SELECT dirs_all.path FROM dir_tag JOIN dirs_all USING (dir_id) JOIN tags_all USING (tag_id) WHERE tags_all.tag_id=".$tag_id;
+    //条件に一致するパスをすべて取得するSQL文作成
+    $sql = "SELECT dirs_all.path FROM dirs_all WHERE";
+    foreach ($addedtags as $addedtag){
+        $sql .= " EXISTS ( SELECT 1 FROM dir_tag JOIN tags_all USING (tag_id) WHERE dir_tag.dir_id = dirs_all.dir_id AND tags_all.tag = '".$addedtag."') AND";
+    }
+
+    if (count($nottags) > 0) {
+        $sql .= " NOT EXISTS ( SELECT 1 FROM dir_tag JOIN tags_all USING (tag_id) WHERE dir_tag.dir_id = dirs_all.dir_id AND tags_all.tag IN (";
+        foreach ($nottags as $nottag) {
+            $sql .= "'".$nottag."' ,";
+        }
+        //末尾のコンマをとる
+        $sql = mb_substr($sql, 0, -1);
+        $sql .= ") )";
+    }
+    //末尾にANDが残っていた場合は削除
+    if (mb_substr($sql, -3) == "AND") {
+        $sql = mb_substr($sql, 0, -3);
+    }
+
+    //SQL実行
     if ($result = $db->query($sql)) {
         if($result->num_rows == 0){
             //echo "エラー：".$srctag."タグに登録されているものはありません<br>";
@@ -209,13 +211,7 @@ function dir_tag_list(String $dir_path){
 
     //文字列変換
     $dir_path = mb_convert_encoding($dir_path,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $dir_path = str_replace(array_keys($replace), array_values($replace), $dir_path);
+    $dir_path = $db->real_escape_string($dir_path);
 
     //ディレクトリのIDを検索
     $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$dir_path."'";
@@ -307,13 +303,7 @@ function make_tag(String $tag){
 
     //文字列変換
     $tag = mb_convert_encoding($tag,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $tag = str_replace(array_keys($replace), array_values($replace), $tag);
+    $tag = $db->real_escape_string($tag);
 
     //insert前に存在していないことを確認
     $sql = "SELECT tag FROM tags_all WHERE tag = '".$tag."'";
@@ -365,17 +355,11 @@ function add_dir_tag(String $path,String $tag){
 
     //文字列変換
     $path = mb_convert_encoding($path,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $path = str_replace(array_keys($replace), array_values($replace), $path);
+    $path = $db->real_escape_string($path);
 
     //tag文字列変換
     $tag = mb_convert_encoding($tag,"UTF-8");
-    $tag = str_replace(array_keys($replace), array_values($replace), $tag);
+    $tag = $db->real_escape_string($tag);
 
     //ディレクトリのIDを検索
     $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$path."'";
@@ -491,17 +475,11 @@ function rm_dir_tag(String $path,String $tag){
 
     //文字列変換
     $path = mb_convert_encoding($path,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $path = str_replace(array_keys($replace), array_values($replace), $path);
+    $path = $db->real_escape_string($path);
 
     //tag文字列変換
     $tag = mb_convert_encoding($tag,"UTF-8");
-    $tag = str_replace(array_keys($replace), array_values($replace), $tag);
+    $tag = $db->real_escape_string($tag);
 
     //ディレクトリのIDを検索
     $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$path."'";
@@ -573,13 +551,7 @@ function rm_tag(String $tag){
 
     //文字列変換
     $tag = mb_convert_encoding($tag,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $tag = str_replace(array_keys($replace), array_values($replace), $tag);
+    $tag = $db->real_escape_string($tag);
 
     //tagのIDを検索
     $sql = "SELECT tag_id FROM tags_all WHERE tag = '".$tag."'";
@@ -641,13 +613,7 @@ function rm_db_dir(String $path){
 
     //文字列変換
     $path = mb_convert_encoding($path,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $path = str_replace(array_keys($replace), array_values($replace), $path);
+    $path = $db->real_escape_string($path);
 
     //tagのIDを検索
     $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$path."'";
@@ -711,13 +677,7 @@ function get_dir_id(String $dir_path){
 
     //文字列変換
     $dir_path = mb_convert_encoding($dir_path,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "'" => "\\'",
-        '"' => '\\"',
-    ];
-    $dir_path = str_replace(array_keys($replace), array_values($replace), $dir_path);
+    $dir_path = $db->real_escape_string($dir_path);
 
     //ディレクトリのIDを検索
     $sql = "SELECT dir_id FROM dirs_all WHERE path = '".$dir_path."'";

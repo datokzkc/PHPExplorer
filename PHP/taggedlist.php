@@ -15,10 +15,55 @@
 <div class ="header">
 <?php
 if(isset($_GET['tag'])){
-    $nowtag = $_GET['tag'];
+    if(is_array($_GET['tag'])) {
+        $addedtag_list = $_GET['tag'];
+    } else {
+        $addedtag_list = array($_GET['tag']);
+    }
 }else{
-        $nowtag = "全て"; //初期値は"全て"とする
+    $addedtag_list = array(); //notのみ指定の可能性があるため初期値は指定しない
 }
+if(isset($_GET['notag'])){
+    if(is_array($_GET['notag'])) {
+        $nottag_list = $_GET['notag'];
+    } else {
+        $nottag_list = array($_GET['notag']);
+    }
+}else{
+    $nottag_list = array(); //addedのみ指定の可能性があるため初期値は指定しない
+}
+
+//指定条件の表示用文字列
+$nowcondition_str = "";
+if (count($addedtag_list) > 0) {
+    $nowcondition_str .= implode(" &amp; ",$addedtag_list);
+    if (count($nottag_list) > 0){
+        $nowcondition_str .= " &amp; ";
+    }
+}
+if (count($nottag_list) > 0) {
+    $nowcondition_str .= "NOT (";
+    $nowcondition_str .= implode(" | ",$nottag_list);
+    $nowcondition_str .= ")";
+}
+
+//指定条件のURL GETパラメータ
+$nowcondition_urlget = "";
+foreach ($addedtag_list as $addedtag){
+    $nowcondition_urlget .= "tag[]=";
+    $nowcondition_urlget .= rawurlencode($addedtag);
+    $nowcondition_urlget .= "&";
+}
+foreach ($nottag_list as $nottag){
+    $nowcondition_urlget .= "notag[]=";
+    $nowcondition_urlget .= rawurlencode($nottag);
+    $nowcondition_urlget .= "&";
+}
+if (strlen($nowcondition_urlget) > 1) {
+    //末尾の余分な&を削除
+    $nowcondition_urlget = substr($nowcondition_urlget, 0, -1);
+}
+
 include 'root_dir.php';
 include 'db-func.php';
 include 'file-func.php';
@@ -27,7 +72,7 @@ mb_internal_encoding("UTF-8");
 
 chdir(ROOT); //ディレクトリの場所の初期化
 
-echo"<h1>タグ「".$nowtag."」のついたもの一覧</h1>\n";
+echo"<h1>タグ条件「".$nowcondition_str."」に一致するもの一覧</h1>\n";
 
 echo "<a href = \"./taglist.php\" >タグ一覧を表示</a><br>\n"
 
@@ -62,7 +107,7 @@ if(isset($_GET['dirimg'])){
 }
 //pathは上で設定済み
 
-$dirlist = tagged_dir_list($nowtag);
+$dirlist = tagged_dir_list($addedtag_list, $nottag_list);
 if($dirlist == false){
     //空の時
     $dirlist = array();
@@ -98,39 +143,39 @@ echo "</b></p>\n";
 
 //表示件数切り替え
 $change_row = ceil($page_long / 2); //減少は半分の切り上げ
-echo "<p><a href=\"./".basename(__FILE__)."?rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\">"."１ページ".$change_row."件表示に切り替え</a> &ensp; ";
+echo "<p><a href=\"./".basename(__FILE__)."?rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\">"."１ページ".$change_row."件表示に切り替え</a> &ensp; ";
 $change_row = $page_long * 2;
-echo "<a href=\"./".basename(__FILE__)."?rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\">"."１ページ".$change_row."件表示に切り替え</a>\n";
+echo "<a href=\"./".basename(__FILE__)."?rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\">"."１ページ".$change_row."件表示に切り替え</a>\n";
 echo"<br>\n";
 
 //並び替え選択
 if($is_shuffle == 0){
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle="."1"."&dirimg=".$dir_img."&tag=".$nowtag."\">"."シャッフルする</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle="."1"."&dirimg=".$dir_img."&".$nowcondition_urlget."\">"."シャッフルする</a><br>\n";
 }else{
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle="."0"."&dirimg=".$dir_img."&tag=".$nowtag."\">"."通常の並びへ戻す</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle="."0"."&dirimg=".$dir_img."&".$nowcondition_urlget."\">"."通常の並びへ戻す</a><br>\n";
 }
 
 //ディレクトリ画像オンオフ
 if($dir_img == 0){
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."1"."&tag=".$nowtag."\">"."ディレクトリ代表画像の表示</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."1"."&".$nowcondition_urlget."\">"."ディレクトリ代表画像の表示</a><br>\n";
 }else{
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."0"."&tag=".$nowtag."\">"."ディレクトリ代表画像の非表示</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."0"."&".$nowcondition_urlget."\">"."ディレクトリ代表画像の非表示</a><br>\n";
 }
 
 //プレイリストに全追加ボタン
-echo "<button type=\"button\" id=\"tag_to_list_btn\">タグ「".$nowtag."」がついた音楽でプレイリストを作成</button><br>\n";
+echo "<button type=\"button\" id=\"tag_to_list_btn\">タグ条件「".$nowcondition_str."」の結果に含まれる曲でプレイリストを作成</button><br>\n";
 
 //ページ移動
 echo "<div class=\"pageIndex\">\n";
 if($page_no < $max_page){
     $next_page = $page_no + 1;
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
 }
 for($i = 1; $i <= $max_page; $i++){
     if($i == $page_no){ //現在のページはリンクを張らない
         echo "<b>{$page_no}</b>  ";
     }else{
-        echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\">".$i."</a>  ";
+        echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\">".$i."</a>  ";
     }
 }
 echo "</div>\n";
@@ -193,7 +238,7 @@ foreach($disp_list as $key => $folder){
         $key --;
     }
     echo "<br>";
-    print_tag($folder,$nowtag);
+    print_tag($folder,$addedtag_list);
     echo "</td></tr>";
 }
 echo "</table><br>\n";
@@ -202,13 +247,13 @@ echo "</table><br>\n";
 echo "<div class=\"pageIndex\">\n";
 if($page_no < $max_page){
     $next_page = $page_no + 1;
-    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
 }
 for($i = 1; $i <= $max_page; $i++){
     if($i == $page_no){ //現在のページはリンクを張らない
         echo "<b>{$page_no}</b>  ";
     }else{
-        echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&tag=".$nowtag."\">".$i."</a>  ";
+        echo "<a href=\"./".basename(__FILE__)."?rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."&".$nowcondition_urlget."\">".$i."</a>  ";
     }
 }
 echo "</div>\n";
@@ -247,18 +292,18 @@ function gettopimage(string $foldername,Int $num){
 }
 
 //タグ表示（これより前には改行が入っている前提）
-function print_tag(String $path,String $nowtag){
+function print_tag(String $path,Array $addedtag_list){
     $tags = dir_tag_list($path);
     if(count($tags) == 0){
         return;
     }
     echo "<div class = \"tags\">\n";
     foreach($tags as $tag){
-        if(strcmp($tag,$nowtag)==0){
+        if(in_array($tag,$addedtag_list)){
             echo "<b>".$tag."</b>　";
         }
         else{
-            echo "<a href=\"./"."taggedlist.php"."?tag=".$tag."\"> ".$tag."</a>　";
+            echo "<a href=\"./"."taggedlist.php"."?tag[]=".rawurlencode($tag)."\"> ".$tag."</a>　";
         }
     }
     echo "</div>\n";
@@ -268,7 +313,7 @@ function print_tag(String $path,String $nowtag){
 <div class="footer">
 <?php
 chdir(ROOT);
-echo"<p>タグ「".$nowtag."」<p><br>\n";
+echo"<p>タグ「".$nowcondition_str."」<p><br>\n";
 
 echo "<a href = \"./taglist.php\" >タグ一覧を表示</a><br>\n"
 ?>
@@ -277,7 +322,16 @@ echo "<a href = \"./taglist.php\" >タグ一覧を表示</a><br>\n"
 <script type="text/javascript">
 $(document).ready(function (){
     <?php
-    echo "var nowtag = \"".$nowtag."\";\n";
+    //json変換のためUTF8に変換
+    foreach ($addedtag_list as $addedtag){
+        $addedtag = mb_convert_encoding($addedtag,"UTF-8");
+    }
+    foreach ($nottag_list as $nottag){
+        $nottag = mb_convert_encoding($nottag,"UTF-8");
+    }
+
+    echo "var addedtag = ".json_encode($addedtag_list).";\n";
+    echo "var nottag = ".json_encode($nottag_list).";\n";
     ?>
     $('#tag_to_list_btn').click(function(){
         $.ajax({
@@ -285,7 +339,8 @@ $(document).ready(function (){
             type: 'POST',
             data: {
                 'mode': "tag_to_list",
-                'tag': nowtag
+                'tag': addedtag,
+                'notag': nottag
             }
         })
             // Ajaxリクエストが成功した時発動
