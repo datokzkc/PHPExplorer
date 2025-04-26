@@ -254,7 +254,7 @@ function print_tag(String $path){
     }
     echo "<div class = \"tags\">\n";
     foreach($tags as $tag){
-        echo "<a href=\"./"."taggedlist.php"."?tag=".$tag."\"> ".$tag."</a>　";
+        echo "<a href=\"./"."taggedlist.php"."?tag[]=".rawurlencode($tag)."\"> ".$tag."</a>　";
     }
     echo "</div>\n";
 }

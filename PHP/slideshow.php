@@ -80,7 +80,7 @@ chdir(ROOT);
 echo "<div class=\"tags\" hidden>\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -161,7 +161,7 @@ echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 chdir(ROOT);
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>

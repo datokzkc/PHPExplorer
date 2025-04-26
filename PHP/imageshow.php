@@ -75,7 +75,7 @@ echo "<h2>合計：".count($list)."枚（画像以外のファイルなども含
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -143,7 +143,7 @@ chdir(ROOT);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>

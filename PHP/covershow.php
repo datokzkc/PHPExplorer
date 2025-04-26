@@ -133,7 +133,7 @@ chdir(ROOT);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -341,7 +341,7 @@ function print_tag(String $path){
     }
     echo "<div class = \"tags\">";
     foreach($tags as $tag){
-        echo "<a href=\"./"."taggedlist.php"."?tag=".$tag."\"> ".$tag."</a>　";
+        echo "<a href=\"./"."taggedlist.php"."?tag[]=".rawurlencode($tag)."\"> ".$tag."</a>　";
     }
     echo "</div>";
 }
@@ -357,7 +357,7 @@ echo"<p>表示ディレクトリ：".$name."</p>\n";
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>

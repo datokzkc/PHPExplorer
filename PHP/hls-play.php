@@ -61,7 +61,7 @@ echo "<a href = \"./covershow.php?path=".rawurlencode(dirname($link))."\"> 親�
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -199,7 +199,7 @@ chdir(ROOT);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>

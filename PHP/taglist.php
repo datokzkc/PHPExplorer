@@ -131,7 +131,7 @@ foreach($taglist as $tag){
         }
     }
     
-    echo "<a href=\"./taggedlist.php?tag=".$tag."\"> ".$tag." </a>";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>";
 
     if($mode == 1){
         if(($tagdirs = tagged_dir_list([$tag],[])) != false){
