@@ -5,10 +5,10 @@
 <title>
 タグ内一覧（代表画像表示）
 </title>
-<link rel="stylesheet" type="text/css" href="/HTTP/CSS/covershow.css">
+<link rel="stylesheet" type="text/css" href="../CSS/taggedlist.css">
 <!-- jQuery -->
-<script type="text/javascript" src="/HTTP/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/totop.js"></script>
+<script type="text/javascript" src="../jquery-3.5.0.js"></script>
+<script type="text/javascript" src="../javascript/totop.js"></script>
 </head>
 
 <body>
@@ -165,9 +165,10 @@ if($dir_img == 0){
 //プレイリストに全追加ボタン
 echo "<button type=\"button\" id=\"tag_to_list_btn\">タグ条件「".$nowcondition_str."」の結果に含まれる曲でプレイリストを作成</button><br>\n";
 
+echo "\n";
+//検索条件編集用フォーム
+echo "<form id=\"condition_form\" action=\"./".basename(__FILE__)."\" method=\"get\">";
 ?>
-
-<form id="condition_form" action="" method="get">
 <label for="condition_form">検索条件入力</label><br>
 <label for="tag_input">含まれるタグ</label>
 <select id="tag_input" name="tag[]" multiple>
@@ -181,7 +182,7 @@ foreach($alltag_list as $tag){
     echo "> ".$tag." </option>\n";
 }
 ?>
-</select>
+</select> <br>
 <label for="notag_input">含まれないタグ</label>
 <select id="notag_input" name="notag[]" multiple>
 <?php
@@ -195,8 +196,8 @@ foreach($alltag_list as $tag){
 ?>
 </select>
 <br>
-<input type="reset" value="リセット" > &nbsp;
-<input type="submit" value="実行" >
+<input type="submit" value="実行" > &nbsp;
+<input type="reset" value="リセット" >
 </form>
 
 <?php

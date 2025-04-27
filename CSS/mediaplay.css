@@ -1,0 +1,35 @@
+@import url("common.css");
+div.header a{
+    font-style: italic;
+}
+div.covershow a img{
+    border: 2px #0000ff solid;
+}
+table{
+    white-space: pre-wrap;
+    border-spacing: 0px 0px;
+    border: solid 2px black;
+    line-height: 100%;
+    width:100%;
+    table-layout: fixed;
+}
+table td{
+    border-bottom:solid 1px black;
+    padding: 5px;
+    padding-bottom: 8px;
+    margin :none;
+    border-left: dotted 1px black;
+}
+table img{
+    border: solid 1px black;
+}
+table td.longcel{
+    margin: none;
+    border-right: solid 2px black;
+    max-width: 30%;
+}
+table td.label{
+    margin: none;
+    border-left: none;
+    max-width: 20%;
+}

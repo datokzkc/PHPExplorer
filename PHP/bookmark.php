@@ -5,10 +5,10 @@
 <title>
 ブックマーク一覧
 </title>
-<link rel="stylesheet" type="text/css" href="/HTTP/CSS/taglist.css">
+<link rel="stylesheet" type="text/css" href="../CSS/taglist.css">
 <!-- jQuery -->
-<script type="text/javascript" src="/HTTP/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/totop.js"></script>
+<script type="text/javascript" src="../jquery-3.5.0.js"></script>
+<script type="text/javascript" src="../javascript/totop.js"></script>
 </head>
 
 <body>

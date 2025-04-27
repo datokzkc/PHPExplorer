@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>画像一覧表示</title>
-<link rel="stylesheet" type="text/css" href="/HTTP/CSS/imageshow.css">
+<link rel="stylesheet" type="text/css" href="../CSS/imageshow.css">
 <!-- jQuery -->
-<script type="text/javascript" src="/HTTP/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/totop.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/tagcont.js"></script>
+<script type="text/javascript" src="../jquery-3.5.0.js"></script>
+<script type="text/javascript" src="../javascript/totop.js"></script>
+<script type="text/javascript" src="../javascript/tagcont.js"></script>
 </head>
 
 <body>

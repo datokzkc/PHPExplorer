@@ -5,11 +5,11 @@
 <title>
 画像表示(スライドショー型)
 </title>
-<link rel="stylesheet" type="text/css" href="/HTTP/CSS/slideshow.css">
+<link rel="stylesheet" type="text/css" href="../CSS/slideshow.css">
 <!-- jQuery -->
-<script type="text/javascript" src="/HTTP/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/totop.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/tagcont.js"></script>
+<script type="text/javascript" src="../jquery-3.5.0.js"></script>
+<script type="text/javascript" src="../javascript/totop.js"></script>
+<script type="text/javascript" src="../javascript/tagcont.js"></script>
 </head>
 
 <body>

@@ -5,10 +5,10 @@
 <title>
 メディア再生ページ
 </title>
-<link rel="stylesheet" type="text/css" href="/HTTP/CSS/mediaplay.css">
+<link rel="stylesheet" type="text/css" href="../CSS/mediaplay.css">
 <!-- jQuery -->
-<script type="text/javascript" src="/HTTP/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="/HTTP/javascript/tagcont.js"></script>
+<script type="text/javascript" src="../jquery-3.5.0.js"></script>
+<script type="text/javascript" src="../javascript/tagcont.js"></script>
 </head>
 <body>
 <div class ="header">
@@ -93,7 +93,7 @@ if(is_audio($path)){
     echo "<audio src=\"/".rawurlencode($link)."\" controls id=\"audio_player\"><p>この音楽はこのブラウザでは再生できません</p></audio><br>\n";
 }
 ?>
-<script src="/HTTP/javascript/player/aurora.js"></script>
+<script src="../javascript/player/aurora.js"></script>
 <?php
 //.m4aはALACとする
 $is_load = false;
@@ -127,7 +127,7 @@ else{
 
 ?>
 <table id="musicinfo" hidden>
-<tr><td rowspan="4" class="longcel"><img src="/HTTP/img/player/fallback_album_art.png" id="album_cover"></td><td class="label">曲名</td><td id="music_title">Can't Read</td></tr>
+<tr><td rowspan="4" class="longcel"><img src="../img/player/fallback_album_art.png" id="album_cover"></td><td class="label">曲名</td><td id="music_title">Can't Read</td></tr>
 <tr><td class="label">アーティスト</td><td id="music_artist">Can't Read</td></tr>
 <tr><td class="label">アルバム</td><td id="album_title">Can't Read</td></tr>
 <tr><td class="label">アルバムアーティスト</td><td id="album_artist">Can't Read</td></tr>

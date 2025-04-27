@@ -1,0 +1,16 @@
+@import url("covershow.css");
+
+#condition_form {
+    width: fit-content;
+    border: 1px deeppink dashed;
+    background-color: pink;
+}
+label[for="condition_form"] {
+    font-weight: bold;
+}
+input[type="submit"]{
+    margin-right: 10px; 
+}
+input[type="reset"]{
+    margin-right: 10px; 
+}
