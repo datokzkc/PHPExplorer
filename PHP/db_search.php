@@ -17,6 +17,7 @@ DB検索結果（代表画像表示）
 include 'root_dir.php';
 include 'db-func.php';
 include 'file-func.php';
+include 'search-class.php';
 
 if(isset($_GET['search'])){
     $search = $_GET['search'];
@@ -26,13 +27,13 @@ if(isset($_GET['search'])){
 }
 chdir(ROOT); //ディレクトリの場所の初期化
 
-echo"<h1>「".$search."」の検索結果</h1>\n";
+echo"<h1>「".htmlspecialchars($search)."」の検索結果</h1>\n";
 
 echo "<a href = \"./db_all.php\" >データベース登録の全表示へ戻る</a><br>\n";
 
 echo "<br>\n";
 echo "<form action=\"./db_search.php\" method=\"get\" class=\"search_form\">\n";
-echo "<input type=\"text\" name=\"search\" value=\"{$search}\">\n";
+echo "<input type=\"text\" name=\"search\" value=\"".htmlspecialchars($search)."\">\n";
 echo "<button type=\"submit\">検索</button>\n";
 echo "</form>\n";
 ?>
@@ -71,31 +72,11 @@ $dirlist = all_dir_list();
 chdir(ROOT); // ディレクトリ移動
 
 //抽出
-$search_re = mb_convert_encoding($search,"UTF-8");
-    $replace = [
-        // '置換前の文字' => '置換後の文字',
-        '\\' => '\\\\',
-        "^" => "\\^",
-        '$' => '\\$',
-        '.' => '\\.',
-        '[' => '\\[',
-        ']' => '\\]',
-        '|' => '\\|',
-        '(' => '\\(',
-        ')' => '\\)',
-        '?' => '\\?',
-        '*' => '\\*',
-        '+' => '\\+',
-        '{' => '\\{',
-        '}' => '\\}',
-        // and検索対策 スペースはAND検索に置換
-        '　' => ' ',
-        '  ' => ' ',
-        ' ' => ')(?=.*'
-    ];
-$search_re = str_replace(array_keys($replace), array_values($replace), $search_re);
-//大文字小文字は区別せず検索
-$dirlist = preg_grep('/(?=.*'.$search_re.').*/i',$dirlist);
+$search_query = mb_convert_encoding($search,"UTF-8");
+$search_obj = new SearchClass();
+$search_obj->set_query_str($search_query);
+//検索条件に合致するものを抽出
+$dirlist = $search_obj->filter_list_by_query($dirlist);
 
 if(count($dirlist)== 0){
     $dirlist[] = "\n--@//nothing";
@@ -124,36 +105,36 @@ echo "</b></p>\n";
 
 //表示件数切り替え
 $change_row = ceil($page_long / 2); //減少は半分の切り上げ
-echo "<p><a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">"."１ページ".$change_row."件表示に切り替え</a> &ensp; ";
+echo "<p><a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">"."１ページ".$change_row."件表示に切り替え</a> &ensp; ";
 $change_row = $page_long * 2;
-echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">"."１ページ".$change_row."件表示に切り替え</a>\n";
+echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$change_row."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">"."１ページ".$change_row."件表示に切り替え</a>\n";
 echo"<br>\n";
 
 //並び替え選択
 if($is_shuffle == 0){
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$page_no."&shuffle="."1"."&dirimg=".$dir_img."\">"."シャッフルする</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$page_no."&shuffle="."1"."&dirimg=".$dir_img."\">"."シャッフルする</a><br>\n";
 }else{
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$page_no."&shuffle="."0"."&dirimg=".$dir_img."\">"."通常の並びへ戻す</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$page_no."&shuffle="."0"."&dirimg=".$dir_img."\">"."通常の並びへ戻す</a><br>\n";
 }
 
 //ディレクトリ画像オンオフ
 if($dir_img == 0){
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."1"."\">"."ディレクトリ代表画像の表示</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."1"."\">"."ディレクトリ代表画像の表示</a><br>\n";
 }else{
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."0"."\">"."ディレクトリ代表画像の非表示</a><br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$page_no."&shuffle=".$is_shuffle."&dirimg="."0"."\">"."ディレクトリ代表画像の非表示</a><br>\n";
 }
 
 //ページ移動
 echo "<div class=\"pageIndex\">\n";
 if($page_no < $max_page){
     $next_page = $page_no + 1;
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
 }
 for($i = 1; $i <= $max_page; $i++){
     if($i == $page_no){ //現在のページはリンクを張らない
         echo "<b>{$page_no}</b>  ";
     }else{
-        echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">".$i."</a>  ";
+        echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">".$i."</a>  ";
     }
 }
 echo "</div>\n";
@@ -233,13 +214,13 @@ echo "</table><br>\n";
 echo "<div class=\"pageIndex\">";
 if($page_no < $max_page){
     $next_page = $page_no + 1;
-    echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
+    echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$next_page."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\" class = \"next_btn\"> NEXT(".$next_page."ページ) &gt; </a>  <br>\n";
 }
 for($i = 1; $i <= $max_page; $i++){
     if($i == $page_no){ //現在のページはリンクを張らない
         echo "<b>{$page_no}</b>  ";
     }else{
-        echo "<a href=\"./".basename(__FILE__)."?search=".$search."&rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">".$i."</a>  ";
+        echo "<a href=\"./".basename(__FILE__)."?search=".rawurlencode($search)."&rawno=".$page_long."&page=".$i."&shuffle=".$is_shuffle."&dirimg=".$dir_img."\">".$i."</a>  ";
     }
 }
 echo "</div>";
@@ -294,7 +275,7 @@ function print_tag(String $path){
 <div class="footer">
 <?php
 chdir(ROOT);
-echo"<p>「".$search."」の検索結果<p><br>\n";
+echo"<p>「".htmlspecialchars($search)."」の検索結果<p><br>\n";
 echo "<a href = \"./db_all.php\" >データベース登録の全表示へ戻る</a><br>\n";
 ?>
 </div>
