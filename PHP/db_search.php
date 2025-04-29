@@ -73,7 +73,7 @@ chdir(ROOT); // ディレクトリ移動
 
 //抽出
 $search_query = mb_convert_encoding($search,"UTF-8");
-$search_obj = new SearchClass();
+$search_obj = new SearchClass(SearchClass::KEEP_QUERY_MODE);
 $search_obj->set_query_str($search_query);
 //検索条件に合致するものを抽出
 $dirlist = $search_obj->filter_list_by_query($dirlist);
