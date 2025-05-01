@@ -114,7 +114,7 @@ foreach($taglist as $tag){
                 if(is_audio($tagdirs[$top]) || is_video($tagldirs[$top])){
                     //メディアの場合はリンクで表示
                     $medialink = substr(realpath($tagdirs[$top]), strlen(ROOT)); 
-                    echo "<a href = \"./mediaplay.php?path=".rawurlencode($medialink)."\">Media:".basename($tagdirs[$top])."</a><br>";
+                    echo "<a href = \"./mediaplay.php?path=".rawurlencode($medialink)."\">Media:".htmlspecialchars(basename($tagdirs[$top]))."</a><br>";
                 }
             }
             elseif(($img = gettopimage($tagdirs[$top],3)) == NULL){
@@ -131,7 +131,7 @@ foreach($taglist as $tag){
         }
     }
     
-    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".htmlspecialchars($tag)." </a>";
 
     if($mode == 1){
         if(($tagdirs = tagged_dir_list([$tag],[])) != false){

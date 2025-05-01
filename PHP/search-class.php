@@ -9,6 +9,7 @@ public のメソッドは以下の通り
         get_target_str() : String; //検索対象文字列を取得する
         is_match() : bool; //検索条件に一致しているかを判定する
         filter_list_by_query(array $list) : array; //リストの中から検索条件に一致するものをフィルタリングする
+        pickup_match_query(array $query_list) : array; //クエリリスト（["query"]を含む連想配列リスト）から検索条件を満たすものだけ取り出す
 */
 class SearchClass{
     protected $query_str = "";
@@ -88,6 +89,18 @@ class SearchClass{
         $result = array();
         foreach ($list as $item){
             $this->set_target_str($item);
+            if ($this->is_match()){
+                $result[] = $item;
+            }
+        }
+        return $result;
+    }
+
+    //クエリリスト（["query"]を含む連想配列リスト）から検索条件を満たすものだけ取り出す
+    public function pickup_match_query(array $query_list){
+        $result = array();
+        foreach ($query_list as $item){
+            $this->set_query_str($item["query"]);
             if ($this->is_match()){
                 $result[] = $item;
             }

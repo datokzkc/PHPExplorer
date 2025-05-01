@@ -18,6 +18,7 @@
 include 'root_dir.php';
 include 'db-func.php';
 include 'file-func.php';
+include 'search-class.php';
 
 if(isset($_GET['path'])){
     $path = $_GET['path'];
@@ -69,7 +70,13 @@ chdir(ROOT);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)." </a>　";
+}
+$search_obj = new SearchClass(SearchClass::KEEP_TARGET_MODE);
+$search_obj->set_target_str(realpath($path));
+$querys = $search_obj->pickup_match_query(get_search_query_list());
+foreach($querys as $query){
+    echo "<a href=\"./db_search.php?search=".rawurlencode($query["query"])."\" class=\"searchquery\"> ".htmlspecialchars($query["name"])." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -77,7 +84,7 @@ echo "</div class=\"tagshow\">\n";
 <select id="rm_tag1" hidden>
 <?php
 foreach($tags as $tag){
-    echo "<option value=\"".$tag."\"> ".$tag." </option>\n";
+    echo "<option value=\"".htmlspecialchars($tag)."\"> ".htmlspecialchars($tag)." </option>\n";
 }
 ?>
 </select>
@@ -85,7 +92,7 @@ foreach($tags as $tag){
 <?php
 $addlist = array_diff(all_tag_list(),$tags);
 foreach($addlist as $tag){
-    echo "<option value=\"".$tag."\"> ".$tag." </option>\n";
+    echo "<option value=\"".htmlspecialchars($tag)."\"> ".htmlspecialchars($tag)." </option>\n";
 }
 ?>
 <option value="自分で入力(新規追加)">自分で入力(新規追加)</option>
@@ -152,7 +159,13 @@ echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 chdir(ROOT);
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
-    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\"> ".$tag." </a>　";
+    echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)." </a>　";
+}
+$search_obj = new SearchClass(SearchClass::KEEP_TARGET_MODE);
+$search_obj->set_target_str(realpath($path));
+$querys = $search_obj->pickup_match_query(get_search_query_list());
+foreach($querys as $query){
+    echo "<a href=\"./db_search.php?search=".rawurlencode($query["query"])."\" class=\"searchquery\"> ".htmlspecialchars($query["name"])." </a>　";
 }
 echo "</div class=\"tagshow\">\n";
 ?>
@@ -160,7 +173,7 @@ echo "</div class=\"tagshow\">\n";
 <select id="rm_tag2" hidden>
 <?php
 foreach($tags as $tag){
-    echo "<option value=\"".$tag."\"> ".$tag." </option>\n";
+    echo "<option value=\"".htmlspecialchars($tag)."\"> ".htmlspecialchars($tag)." </option>\n";
 }
 ?>
 </select>
@@ -168,7 +181,7 @@ foreach($tags as $tag){
 <?php
 $addlist = array_diff(all_tag_list(),$tags);
 foreach($addlist as $tag){
-    echo "<option value=\"".$tag."\"> ".$tag." </option>\n";
+    echo "<option value=\"".htmlspecialchars($tag)."\"> ".htmlspecialchars($tag)." </option>\n";
 }
 ?>
 <option value="自分で入力(新規追加)">自分で入力(新規追加)</option>

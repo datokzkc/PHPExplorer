@@ -20,7 +20,7 @@ div.footer{
 div.tags{
     padding:8px 0px;
 }
-div.tags a{
+div.tags a.tag{
     text-decoration: none;
     font-family: sans-serif;
     color: white;
@@ -32,13 +32,25 @@ div.tags a{
     padding : 1px 5px;
     border-radius: 5px 5px 5px 5px;
 }
-div.tags b{
+div.tags b.tag{
     text-decoration: underline;
     color: black;
     background-color: aqua;
     border-width: 2px;
     border-style: solid;
     border-color: blue;
+    padding : 1px 5px;
+    border-radius: 5px 5px 5px 5px;
+}
+div.tags a.searchquery{
+    text-decoration: none;
+    font-family: sans-serif;
+    color: white;
+    text-shadow: 1px 1px 0 black,-1px 1px 0 black,1px -1px 0 black,-1px -1px 0 black;
+    background-color: gold;
+    border-width: 1px;
+    border-style: dashed;
+    border-color: maroon ;
     padding : 1px 5px;
     border-radius: 5px 5px 5px 5px;
 }
