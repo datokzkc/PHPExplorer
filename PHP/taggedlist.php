@@ -342,7 +342,7 @@ function print_tag(String $path,Array $addedtag_list){
     echo "<div class = \"tags\">\n";
     foreach($tags as $tag){
         if(in_array($tag,$addedtag_list)){
-            echo "<b>".$tag."</b>　";
+            echo "<b class=\"tag\">".$tag."</b>　";
         }
         else{
             echo "<a href=\"./"."taggedlist.php"."?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)."</a>　";
