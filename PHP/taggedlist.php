@@ -333,10 +333,7 @@ function gettopimage(string $foldername,Int $num){
 //タグ表示（これより前には改行が入っている前提）
 function print_tag(String $path,Array $addedtag_list){
     $tags = dir_tag_list($path);
-    $search_obj = new SearchClass(SearchClass::KEEP_TARGET_MODE);
-    $search_obj->set_target_str($path);
-    $querys = $search_obj->pickup_match_query(get_search_query_list());
-    if(count($tags) == 0 && count($querys) == 0){
+    if(count($tags) == 0){
         return;
     }
     echo "<div class = \"tags\">\n";
@@ -348,6 +345,9 @@ function print_tag(String $path,Array $addedtag_list){
             echo "<a href=\"./"."taggedlist.php"."?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)."</a>　";
         }
     }
+    $search_obj = new SearchClass(SearchClass::KEEP_TARGET_MODE);
+    $search_obj->set_target_str($path);
+    $querys = $search_obj->pickup_match_query(get_search_query_list());
     foreach($querys as $query){
         echo "<a href=\"./db_search.php?search=".rawurlencode($query["query"])."\" class=\"searchquery\"> ".htmlspecialchars($query["name"])." </a>　";
     }
