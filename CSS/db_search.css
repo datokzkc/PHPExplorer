@@ -1,0 +1,13 @@
+@import url("covershow.css");
+
+.search_query_form {
+    margin: 5px 0px;
+    padding: 3px;
+    width: fit-content;
+    border: 1px chocolate dashed;
+    background-color: lightyellow ;
+}
+.search_query_form p {
+    margin-top: 0px;
+    font-weight: bold;
+}

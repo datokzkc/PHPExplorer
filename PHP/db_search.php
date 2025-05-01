@@ -5,10 +5,11 @@
 <title>
 DB検索結果（代表画像表示）
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/covershow.css">
+<link rel="stylesheet" type="text/css" href="../CSS/db_search.css">
 <!-- jQuery -->
 <script type="text/javascript" src="../jquery-3.5.0.js"></script>
 <script type="text/javascript" src="../javascript/totop.js"></script>
+<script type="text/javascript" src="../javascript/querycont.js"></script>
 </head>
 
 <body>
@@ -38,6 +39,29 @@ echo "<button type=\"submit\">検索</button>\n";
 echo "</form>\n";
 ?>
 </div>
+<?php
+//DB検索クエリ操作フォーム
+?>
+<div class="search_query_form">
+<p id="info_text">検索クエリ記録</p>
+<select id="db_query_list">
+<?php
+$query_list = get_search_query_list();
+foreach($query_list as $query){
+    echo "<option label=\"".htmlspecialchars($query["name"])."\" value=\"".htmlspecialchars($query["query"])."\"> ".htmlspecialchars($query["name"])." </option>\n";
+}
+?>
+<option label="自分で入力(新規追加)">自分で入力(新規追加)</option>
+</select>
+<input id="add_query_text" type="text" name="add_txt_tag" hidden><br>
+<input id="read_query_btn" type="button" value="検索クエリ読み込み" />
+<input id="add_query_btn" type="button" value="現在の検索条件で検索クエリ保存" />
+<input id="rm_query_btn" type="button" value="保存済み検索クエリ削除" />
+<?php
+echo "<div id=\"now_query_text\" hidden>".htmlspecialchars($search)."</div>\n";
+?>
+</div class="search_query_form">
+
 <div class ="covershow">
 <?php
 /*

@@ -622,5 +622,58 @@ switch($mode){
         echo "SUCCESS";
         break;
 
+    case "search_query_add":
+        if(isset($_POST['name'])){
+            $name = $_POST['name'];
+        }else{
+            echo 'FAIL TO AJAX REQUEST';
+            exit();
+        }
+        if(isset($_POST['query'])){
+            $query = $_POST['query'];
+        }else{
+            echo 'FAIL TO AJAX REQUEST';
+            exit();
+        }
+        if(add_search_query($name,$query) !== true){
+            echo "FAIL";
+            exit();
+        }
+        echo "SUCCESS";
+        break;
+    case "search_query_update":
+        if(isset($_POST['name'])){
+            $name = $_POST['name'];
+        }else{
+            echo 'FAIL TO AJAX REQUEST';
+            exit();
+        }
+        if(isset($_POST['query'])){
+            $query = $_POST['query'];
+        }else{
+            echo 'FAIL TO AJAX REQUEST';
+            exit();
+        }
+        if(update_search_query($name,$query) !== true){
+            echo "FAIL";
+            exit();
+        }
+        echo "SUCCESS";
+        break;
+    case "search_query_remove":
+            if(isset($_POST['name'])){
+                $name = $_POST['name'];
+            }else{
+                echo 'FAIL TO AJAX REQUEST';
+                exit();
+            }
+            if(rm_search_query($name) !== true){
+                echo "FAIL";
+            }else{
+                echo "SUCCESS";
+                exit();
+            }
+        break;
+
 }
 ?>

@@ -131,13 +131,13 @@ class SearchClass{
 
         //正規表現でトークンごとに分解
         $pattern = "(?:tag:)?(?:\\\"[^\\\"]*\\\"|\\'[^\\']*\\')|\\(|\\)|[^\\s　\\(\\)]+|[\\s　]+";
-        if (!preg_match("/(".$pattern.")+/u",$this->query_str)){
+        if (!preg_match("/(".$pattern.")+/ui",$this->query_str)){
             $this->query_tokens = array();
             $this->eval_tokens = array();
             //失敗として返す
             return false;
         }
-        preg_match_all("/".$pattern."/u",$this->query_str,$matches);
+        preg_match_all("/".$pattern."/ui",$this->query_str,$matches);
         $raw_query_tokens = $matches[0];
 
         $is_need_next_operator = false;

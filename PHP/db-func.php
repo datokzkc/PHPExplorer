@@ -82,6 +82,23 @@ get_dir_path(int $dir_id){
     登録されているディレクトリIDからディレクトリのフルパスを返す
     データベースに登録されていない場合はエラー終了する
 
+get_search_query_list(){
+    登録されている検索クエリをすべて取得する
+    成功したら"name","query"要素の入った辞書配列を返す
+add_search_query(String $name,String $query){
+    検索クエリを追加する
+    すでに同じ名前のものが登録されている場合はfalseとecho
+    成功したらtrueを返す
+update_search_query(String $name,String $query){
+    検索クエリを更新する
+    指定された名前のものが見つからない場合はfalseとecho
+    成功したらtrueを返す
+rm_search_query(String $name){
+    検索クエリを削除する
+    指定された名前のものが見つからない場合はfalseとecho
+    成功したらtrueを返す
+
+
 */
 function tagged_dir_list(array $addedtags = ["全て"], array $nottags = []){
     //引数設定されていない場合は"全て"タグで検索
@@ -715,7 +732,7 @@ function get_dir_path(int $dir_id){
     }
 
     //ディレクトリのIDを検索
-    $sql = "SELECT path FROM dirs_all WHERE dir_id = '".$dir_path."'";
+    $sql = "SELECT path FROM dirs_all WHERE dir_id = '".$dir_id."'";
     if ($result = $db->query($sql)) {
         if($result->num_rows == 0){
             //ディレクトリIDが登録されていないときはエラーを表示する
@@ -742,5 +759,182 @@ function get_dir_path(int $dir_id){
     return $dir_path;
 }
 
+
+function get_search_query_list(){
+    //登録されている検索クエリをすべて取得する
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(READ_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    
+    //検索クエリ一覧を取得
+    $search_list = array();
+    $sql = "SELECT search_name,search_query FROM search_all ORDER BY search_id";
+    if ($result = $db->query($sql)) {
+        while ($row = $result->fetch_assoc()) {
+            $search_list[] = array(
+                "name" => $row["search_name"],
+                "query" => $row["search_query"]
+            );
+        }
+        // 結果セットを閉じる
+        $result->close();
+    }else{
+        echo "データベース取得エラー<br>\n";
+        exit();
+    }
+    return $search_list;
+}
+
+function add_search_query(String $name,String $query){
+    //新規検索クエリを追加する
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(WRITE_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    //文字列変換
+    $name = mb_convert_encoding($name,"UTF-8");
+    $name = $db->real_escape_string($name);
+
+    $query = mb_convert_encoding($query,"UTF-8");
+    $query = $db->real_escape_string($query);
+
+    //追加前に同じ名前がすでに存在していないかを確認
+    $sql = "SELECT 1 FROM search_all WHERE search_name = '".$name."'";
+    if ($result = $db->query($sql)) {
+        if($result->num_rows != 0){
+            //結果セットの破棄
+            $result->close();
+            $result = null;
+            echo "エラー：同じ名前の検索クエリがすでに登録されています<br>\n";
+            return false;
+        }
+        $result->close();
+        $result = null;
+    }else{
+        echo "データベース検索クエリ確認エラー<br>\n";
+        exit();
+    }
+
+    //登録実行
+    $sql = "INSERT INTO search_all (search_name,search_query) VALUES ('".$name."','".$query."')";
+    if (!$db->query($sql)) {
+        echo "エラー：新規検索クエリのデータベース追加に失敗しました<br>\n";
+        exit();
+    }
+    $db->close();
+    return true;
+}
+
+function update_search_query(String $name,String $query){
+    //検索クエリの内容を更新する
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(WRITE_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    //文字列変換
+    $name = mb_convert_encoding($name,"UTF-8");
+    $name = $db->real_escape_string($name);
+
+    $query = mb_convert_encoding($query,"UTF-8");
+    $query = $db->real_escape_string($query);
+
+    //対象レコードを探す
+    $sql = "SELECT search_id FROM search_all WHERE search_name = '".$name."'";
+    if ($result = $db->query($sql)) {
+        if($result->num_rows == 0){
+            //結果セットの破棄
+            $result->close();
+            $result = null;
+            echo "エラー：アップデート指定された検索クエリが見つかりません<br>\n";
+            return false;
+        }
+        while ($row = $result->fetch_assoc()) {
+            $search_id = $row["search_id"];
+        }
+    }else{
+        echo "データベース検索クエリ確認エラー<br>\n";
+        exit();
+    }
+
+    //登録実行
+    $sql = "UPDATE search_all SET search_query = '".$query."' WHERE search_id = '".$search_id."'";
+    if (!$db->query($sql)) {
+        echo "エラー：検索クエリのデータベースアップデートに失敗しました<br>\n";
+        exit();
+    }
+    $db->close();
+    return true;
+}
+
+function rm_search_query(String $name){
+    //検索クエリ登録を削除する
+    mb_internal_encoding("UTF-8");
+
+    //データベース接続
+    $db = new mysqli(WRITE_DBIP,"php","php","php_dir_tag");
+    if($db->connect_error){
+        echo "データベース接続エラー<br>\n";
+        echo $db->connect_error;
+        exit();
+    }else{
+        $db->set_charset("utf8mb4");
+    }
+
+    //文字列変換
+    $name = mb_convert_encoding($name,"UTF-8");
+    $name = $db->real_escape_string($name);
+
+    //対象レコードを探す
+    $sql = "SELECT search_id FROM search_all WHERE search_name = '".$name."'";
+    if ($result = $db->query($sql)) {
+        if($result->num_rows == 0){
+            //結果セットの破棄
+            $result->close();
+            $result = null;
+            echo "エラー：削除指定された検索クエリが見つかりません<br>\n";
+            return false;
+        }
+        while ($row = $result->fetch_assoc()) {
+            $search_id = $row["search_id"];
+        }
+    }else{
+        echo "データベース検索クエリ確認エラー<br>\n";
+        exit();
+    }
+
+    //登録実行
+    $sql = "DELETE FROM search_all WHERE search_id = '".$search_id."'";
+    if (!$db->query($sql)) {
+        echo "エラー：データベースからの削除に失敗しました<br>\n";
+        exit();
+    }
+    $db->close();
+    return true;
+}
 
 ?>
