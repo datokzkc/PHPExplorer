@@ -32,6 +32,7 @@ echo"<h1>「{$name}」内の画像一覧(サブディレクトリ含む)</h1><br
 echo "<a href = \"/{$path}\" >現在表示しているディレクトリへ移動(/{$path})</a><br>\n";
 echo "<a href = \"./covershow.php?path=".rawurlencode($path)."\"> 現在のディレクトリ内のディレクトリ代表画像一覧</a><br>\n";
 echo "<a href = \"./imageshow.php?path=".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
+echo "<a href = \"./alllistshow.php?path=".rawurlencode($path)."\"> リスト形式で表示</a><br>\n";
 echo "<a href = \"./slideshow.php?mode=all&path=".rawurlencode($path)."\"> スライドショー形式で表示</a><br>\n";
 if(realpath($path)==ROOT){
     //自身で設定したROOTより上に行くリンクも作成しない
@@ -201,6 +202,7 @@ echo realpath($path);?>
 echo "<a href = \"/{$path}\" >現在表示しているディレクトリへ移動(/{$path})</a><br>\n";
 echo "<a href = \"./covershow.php?path=./".rawurlencode($path)."\"> 現在のディレクトリ内のディレクトリ代表画像一覧</a><br>\n";
 echo "<a href = \"./imageshow.php?path=./".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
+echo "<a href = \"./alllistshow.php?path=".rawurlencode($path)."\"> リスト形式で表示</a><br>\n";
 echo "<a href = \"./slideshow.php?mode=all&path=".rawurlencode($path)."\"> スライドショー形式で表示</a><br>\n";
 if(realpath($path)==ROOT){
     //自身で設定したROOTより上に行くリンクも作成しない
