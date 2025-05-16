@@ -12,7 +12,8 @@ div.pageIndex{
     line-height: 1.75
 }
 table{
-    white-space: pre;
+    min-width: 90%;
+    word-wrap:  break-word;
     border-spacing: 0px 10px;
     border-top: solid 1px black;
     line-height: 100%;
