@@ -124,7 +124,7 @@ echo realpath($path);
 
 chdir($path); // ディレクトリ移動
 
-$link = substr(realpath($list[($page - 1)]),strlen(ROOT));
+$link = mb_substr(realpath($list[($page - 1)]),mb_strlen(ROOT));
 echo "<div class=\"imagebox\">\n";
 echo "<a href=\"./slideshow.php?mode=".$mode."&page=".($page + 1)."&path=".rawurlencode($path)."\"><img src=\"/".rawurlencode($link)."\" ></a>\n";
 echo "</div>\n";
@@ -154,7 +154,7 @@ function list_files($dir){
  
     $list = array();
     foreach($iterator as $pathname => $info){
-        $list[] = substr($pathname,strlen($dir)+1);
+        $list[] = mb_substr($pathname,mb_strlen($dir)+1);
     }
     return $list;
 }
@@ -224,34 +224,37 @@ $(document).ready(function (){
 <?php
 echo "var nowpage = ".$page.";\n";
 echo "const maxpage = ".count($list).";\n";
-echo "const nowmode = \"".$mode."\";\n";
+echo "const nowmode = " . json_encode($mode) . ";\n";
 
-//文字列変換
-$path_url = rawurlencode($path);
-$replace = [
-    // '置換前の文字' => '置換後の文字',
-    '\\' => '\\\\',
-    "'" => "\\'",
-    '"' => '\\"',
-];
-$path_url = str_replace(array_keys($replace), array_values($replace), $path_url);
-echo "const this_path = \"".$path_url."\";\n";
+echo "const this_path = " . json_encode(rawurlencode($path)) . ";\n";
 
-echo "const img_list = [";
+// 画像リスト配列をJSONで出力
 chdir($path);
-$firstflag = true;
+$img_urls = [];
 foreach($list as $img){
-    if($firstflag == false){
-        echo ", ";
-    }
-    $link = substr(realpath($img),strlen(ROOT));
-    $link_url = rawurlencode($link);
-    $link_url = str_replace(array_keys($replace), array_values($replace), $link_url);
-    echo "\"".$link_url."\"\n";
-    $firstflag = false;
+    $link = mb_substr(realpath($img),mb_strlen(ROOT));
+    $img_urls[] = rawurlencode($link);
 }
-echo "];\n";
+echo "const img_list = " . json_encode($img_urls) . ";\n";
 ?>
+
+    // --- プリロードキャッシュ ---
+    var preloadCache = {};
+
+    function preloadImages(centerIndex) {
+        var preloadDistance = 2;
+        for (var i = centerIndex - preloadDistance; i <= centerIndex + preloadDistance; i++) {
+            if (i < 1 || i > maxpage) continue;
+            var idx = i - 1;
+            var src = "/" + img_list[idx];
+            if (!preloadCache[src]) {
+                var img = new Image();
+                img.src = src;
+                preloadCache[src] = true;
+            }
+        }
+    }
+
 
     function next_img(){
         if(nowpage >= maxpage){
@@ -271,6 +274,7 @@ echo "];\n";
                 $next_img_btn.hide();
                 $next_a.removeAttr('href');
             }
+            preloadImages(nowpage);
         }
     }
 
@@ -291,6 +295,7 @@ echo "];\n";
             if(nowpage <= 1){
                 $prev_img_btn.hide();
             }
+            preloadImages(nowpage);
         }
     }
 
@@ -343,6 +348,9 @@ echo "];\n";
                 break;
         }
     });
+
+    //初期表示時に周辺の画像をプリロード
+    preloadImages(nowpage);
 
 });
 </script>
