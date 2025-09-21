@@ -5,18 +5,21 @@
 <title>
 ブックマーク一覧
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/taglist.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
+<?php
+require_once 'common-path.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/taglist.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
 
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 
 echo"<h1>ブックマーク一覧</h1>\n";
 
@@ -42,7 +45,7 @@ set_error_handler(function($severity, $message) {
 });
 try{
     // fopenでファイルを開く（'r'は読み込みモードで開く）
-    $fp = fopen("./HTTP/data/bookmark.txt", 'rb');
+    $fp = fopen(pathCombine(DATA_DIR,"/bookmark.txt"), 'rb');
 
     while (!feof($fp)) {
         $bmlist[] = fgets($fp);
@@ -124,7 +127,7 @@ function getPageTitle($url){
 <input id="cancel_btn" type="button" value="キャンセル" hidden>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo"<p>ブックマーク一覧</p><br>\n";
 echo "<a href = \"./db_all.php\" >データベースに登録されているディレクトリ一覧</a><br>\n";
 ?>

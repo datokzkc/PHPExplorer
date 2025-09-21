@@ -5,23 +5,26 @@
 <title>
 メディア再生ページ(HLS)
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/mediaplay.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/tagcont.js"></script>
+<?php
+
+setlocale(LC_ALL, 'ja_JP.UTF-8');
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/mediaplay.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/tagcont.js"))."\"></script>\n";
+?>
 </head>
 <body>
 <div class ="header">
 <?php
 
-include 'root_dir.php';
-setlocale(LC_ALL, 'ja_JP.UTF-8');
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
-
 //変換したHLSを格納する場所。このディレクトリは必ず存在するように事前に作成しておく。
-//最後のスラッシュは記載しない。ROOTから見た相対パス(?)で記載すること。
+//最後のスラッシュは記載しない。WEB_ROOT_DIRから見た相対パス(?)で記載すること。
 define("HLS_SAVE_PATH",".folder/Video/HLS");
 
 if(isset($_GET['path'])){
@@ -41,11 +44,11 @@ if(isset($_GET['forceencode'])){
 }else{
     $forceEncode = false;
 }
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 $name = basename(realpath($path));
 echo"<h1>「{$name}」の再生画面(HLS)</h1><br>\n";
-$link = substr(realpath($path),strlen(ROOT));
-echo "<a href = \"/{$link}\" >直接表示(/{$link})</a><br><br>\n";
+$link = getRelativePath(realpath($path),WEB_ROOT_DIR);
+echo "<a href = \"/".webPathEncode($link)."\" >直接表示(/".htmlspecialchars($link).")</a><br><br>\n";
 echo "<a href = \"./mediaplay.php?path=".rawurlencode(($link))."\"> 通常のメディア再生ページへ</a><br><br>\n";
 
 echo "<a href = \"/".dirname($link)."\" >親ディレクトリを表示(/".dirname($link).")</a><br>\n";
@@ -108,8 +111,8 @@ if ($dir_id < 0){
     exit();
 }
 
-chdir(ROOT);
-$hls_file = HLS_SAVE_PATH."\\".$dir_id."\\".$dir_id.".m3u8" ;
+chdir(WEB_ROOT_DIR);
+$hls_file = pathCombine(pathCombine(HLS_SAVE_PATH,$dir_id),$dir_id.".m3u8" );
 //$hls_file = ".folder/Video/tmp/hogehoge/output.m3u8";
 
 if($forceEncode == true){
@@ -201,7 +204,7 @@ echo "<a href=\"./mediaplay.php?playmode=".$mode."&path=".rawurlencode($path)."\
 <?php
 echo"<p>ファイル名「{$name}」</p>\n";
 
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 //タグ表示
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));

@@ -5,21 +5,24 @@
 <title>
 DBディレクトリ一覧（代表画像表示）
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/covershow.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
+<?php
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/covershow.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
 
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 
 echo"<h1>データベース内登録済みフォルダ一覧</h1>\n";
 
@@ -58,7 +61,7 @@ if(isset($_GET['dirimg'])){
 $dirlist = all_dir_list();
 //隠しファイルの削除
 //$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
-chdir(ROOT); // ディレクトリ移動
+chdir(WEB_ROOT_DIR); // ディレクトリ移動
 
 if(count($dirlist)== 0){
     $dirlist[] = "\n--@//nothing";
@@ -141,7 +144,7 @@ foreach($disp_list as $key => $folder){
         echo "<tr><td>Empty.</td></tr>";
         break;
     }
-    $link = substr(realpath($folder),strlen(ROOT));
+    $link = getRelativePath(realpath($folder),WEB_ROOT_DIR);
     $disp_link = htmlspecialchars($link);
     echo "<tr><td>";
 
@@ -156,16 +159,16 @@ foreach($disp_list as $key => $folder){
             if(($img = gettopimage($folder,3)) == NULL){
             //画像が存在しないときはディレクトリへのリンクを表示
             $key ++;
-            echo "<a href = \"/{$link}\">".$key.": {$disp_link}</a>（直近３階層ディレクトリ内画像なし）";
+            echo "<a href = \"/".webPathEncode($link)."\">".$key.": {$disp_link}</a>（直近３階層ディレクトリ内画像なし）";
             echo "<br>";
             print_tag($folder);
             $key --;
             }
             else{
                 $key ++;
-                $imglink = substr(realpath($folder."/".$img),strlen(ROOT));
+                $imglink = getRelativePath(realpath($folder."/".$img),WEB_ROOT_DIR);
                 //画像が存在する場合はimageshowに渡す
-                echo "<a href = \"./imageshow.php?path=".rawurlencode($link)."\"><img src=\"/{$imglink}\" ></a>";
+                echo "<a href = \"./imageshow.php?path=".rawurlencode($link)."\"><img src=\"/".webPathEncode($imglink)."\" ></a>";
                 echo "<br><a href = \"./imageshow.php?path=".rawurlencode($link)."\">".$key.": {$disp_link}</a><br>";
                 print_tag($folder);
                 $key --;
@@ -174,15 +177,15 @@ foreach($disp_list as $key => $folder){
     }elseif(is_picture($folder)){
         //画像の場合は表示して次へ
         $key ++;
-        $imglink = substr(realpath($folder),strlen(ROOT));
-        echo "<img src=\"/{$imglink}\" >";
+        $imglink = getRelativePath(realpath($folder),WEB_ROOT_DIR);
+        echo "<img src=\"/".webPathEncode($imglink)."\" >";
         echo "<br>".$key.": {$disp_link}<br>";
         print_tag($folder);
         $key --;
     }elseif(is_audio($folder) || is_video($folder)){
         //メディアの場合はメディア再生ページへのリンクを張る
         $key ++;
-        $imglink = substr(realpath($folder),strlen(ROOT));
+        $imglink = getRelativePath(realpath($folder),WEB_ROOT_DIR);
         echo "<a href=\"./mediaplay.php?path=".rawurlencode($imglink)."\" >";
         echo "".$key.": {$folder}</a> (メディア再生ページへ)<br>";
         print_tag(realpath($folder));
@@ -190,7 +193,7 @@ foreach($disp_list as $key => $folder){
     }else{
         //画像以外のファイル
         $key ++;
-        echo "<a href = \"/{$link}\">".$key.": {$disp_link}</a>（ファイル）";
+        echo "<a href = \"/".webPathEncode($link)."\">".$key.": {$disp_link}</a>（ファイル）";
         echo "<br>";
         print_tag($folder);
         $key --;
@@ -269,7 +272,7 @@ function print_tag(String $path){
 </div>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo"<p>データベース登録済みディレクトリ一覧<p><br>\n";
 echo "<a href = \"./taglist.php\" >タグ一覧を表示</a><br>\n";
 ?>

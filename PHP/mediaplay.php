@@ -5,20 +5,23 @@
 <title>
 メディア再生ページ
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/mediaplay.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/tagcont.js"></script>
+<?php
+
+setlocale(LC_ALL, 'ja_JP.UTF-8');
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/mediaplay.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/tagcont.js"))."\"></script>\n";
+?>
 </head>
 <body>
 <div class ="header">
 <?php
-
-include 'root_dir.php';
-setlocale(LC_ALL, 'ja_JP.UTF-8');
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
 
 if(isset($_GET['path'])){
     $path = $_GET['path'];
@@ -32,13 +35,13 @@ if(isset($_GET['playmode'])){
 }else{
     $mode = "nomal"; //設定されていない場合はノーマルに
 }
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 $name = basename(realpath($path));
-echo"<h1>「{$name}」の再生画面</h1><br>\n";
-$link = substr(realpath($path),strlen(ROOT));
-echo "<a href = \"/{$link}\" >直接表示(/{$link})</a><br><br>\n";
+echo"<h1>「".htmlspecialchars($name)."」の再生画面</h1><br>\n";
+$link = getRelativePath(realpath($path),WEB_ROOT_DIR);
+echo "<a href = \"/".webPathEncode($link)."\" >直接表示(/".htmlspecialchars($link).")</a><br><br>\n";
 
-echo "<a href = \"/".dirname($link)."\" >親ディレクトリを表示(/".dirname($link).")</a><br>\n";
+echo "<a href = \"/".webPathEncode(dirname($link))."\" >親ディレクトリを表示(/".htmlspecialchars(dirname($link)).")</a><br>\n";
 echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($link))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
 echo "<a href = \"./allshow.php?path=".rawurlencode(dirname($link))."\"> 親ディレクトリへ（サブディレクトリ含め全部表示）</a><br>\n";
 echo "<a href = \"./covershow.php?path=".rawurlencode(dirname($link))."\"> 親ディレクトリへ（代表画像表示、メディア表示なし）</a><br>\n";
@@ -91,7 +94,7 @@ echo realpath($path);
 </div class="tags">
 <br>
 <?php
-$link = substr(realpath($path),strlen(ROOT));
+$link = getRelativePath(realpath($path),WEB_ROOT_DIR);
 if(is_video($path)){
     echo "<video src=\"/".rawurlencode($link)."\" controls><p>このビデオはこのブラウザでは再生できません</p></video><br>\n";
     echo "<br><a href = \"./hls-play.php?path=".rawurlencode($link)."\"> HLS(ストリーミング)再生</a><br>\n";
@@ -99,46 +102,45 @@ if(is_video($path)){
 if(is_audio($path)){
     echo "<audio src=\"/".rawurlencode($link)."\" controls id=\"audio_player\"><p>この音楽はこのブラウザでは再生できません</p></audio><br>\n";
 }
-?>
-<script src="../javascript/player/aurora.js"></script>
-<?php
+echo "<script src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/player/aurora.js"))."\"></script>\n";
+
 //.m4aはALACとする
 $is_load = false;
 $js_play = false;
 if(preg_match("/.*\.m4a$/i",$path) == 1 ||  preg_match("/.*\.alac$/i",$path) == 1){
     echo "ALACメディアプレイヤー<br>\n";
-    echo "<script src=\"/HTTP/javascript/player/alac.js\" id=\"encoder\"></script>";
+    echo "<script src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/player/alac.js"))."\" id=\"encoder\"></script>";
     $is_load = true;
     $js_play = true;
 }
 if(preg_match("/.*\.flac$/i",$path) == 1){
     echo "FLACメディアプレイヤー\n";
-    echo "<script src=\"/HTTP/javascript/player/flac.js\" id=\"encoder\"></script>";
+    echo "<script src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/player/flac.js"))."\" id=\"encoder\"></script>";
     $is_load = true;
     $js_play = true;
 }
 
 if(preg_match("/.*\.mp4$/i",$path) == 1 ||  preg_match("/.*\.aac$/i",$path) == 1){
     echo "AACタグ情報\n";
-    echo "<script src=\"/HTTP/javascript/player/aac.js\" id=\"encoder\"></script>";
+    echo "<script src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/player/aac.js"))."\" id=\"encoder\"></script>";
     $is_load = true;
 }
 if(preg_match("/.*\.mp3$/i",$path) == 1){
     echo "MP3タグ情報\n";
-    echo "<script src=\"/HTTP/javascript/player/mp3.js\" id=\"encoder\"></script>";    
+    echo "<script src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/player/mp3.js"))."\" id=\"encoder\"></script>";
     $is_load = true;
 }
 else{
     echo "<script id=\"encoder\"></script>"; 
 }
 
+echo "<table id=\"musicinfo\" hidden>\n";
+echo "<tr><td rowspan=\"4\" class=\"longcel\"><img src=\"".webPathEncode(pathCombine(BASE_PATH,"/img/player/fallback_album_art.png"))."\" id=\"album_cover\"></td><td class=\"label\">曲名</td><td id=\"music_title\">Can't Read</td></tr>\n";
+echo "<tr><td class=\"label\">アーティスト</td><td id=\"music_artist\">Can't Read</td></tr>\n";
+echo "<tr><td class=\"label\">アルバム</td><td id=\"album_title\">Can't Read</td></tr>\n";
+echo "<tr><td class=\"label\">アルバムアーティスト</td><td id=\"album_artist\">Can't Read</td></tr>\n";
+echo "</table>\n";
 ?>
-<table id="musicinfo" hidden>
-<tr><td rowspan="4" class="longcel"><img src="../img/player/fallback_album_art.png" id="album_cover"></td><td class="label">曲名</td><td id="music_title">Can't Read</td></tr>
-<tr><td class="label">アーティスト</td><td id="music_artist">Can't Read</td></tr>
-<tr><td class="label">アルバム</td><td id="album_title">Can't Read</td></tr>
-<tr><td class="label">アルバムアーティスト</td><td id="album_artist">Can't Read</td></tr>
-</table>
 
 <div id="volume_div" hidden>
 音量：　　<input type="range" id="volume" min="0" max="100" step="1" value="100">
@@ -172,7 +174,7 @@ echo "<a href=\"./mediaplay.php?playmode=".$mode."&path=".rawurlencode($path)."\
 <?php
 echo"<p>ファイル名「{$name}」</p>\n";
 
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 //タグ表示
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));

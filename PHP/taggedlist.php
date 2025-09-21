@@ -5,10 +5,20 @@
 <title>
 タグ内一覧（代表画像表示）
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/taggedlist.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
+<?php
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+
+setlocale(LC_ALL, 'ja_JP.UTF-8');
+mb_internal_encoding("UTF-8");
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/taggedlist.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
@@ -64,15 +74,8 @@ if (strlen($nowcondition_urlget) > 1) {
     $nowcondition_urlget = substr($nowcondition_urlget, 0, -1);
 }
 
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
 
-setlocale(LC_ALL, 'ja_JP.UTF-8');
-mb_internal_encoding("UTF-8");
-
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 
 echo"<h1>タグ条件「".$nowcondition_str."」に一致するもの一覧</h1>\n";
 
@@ -116,7 +119,7 @@ if($dirlist == false){
 }
 //隠しファイルの削除
 //$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
-chdir(ROOT); // ディレクトリ移動
+chdir(WEB_ROOT_DIR); // ディレクトリ移動
 
 if(count($dirlist)== 0){
     $dirlist[] = "\n--@//nothing";
@@ -233,7 +236,7 @@ foreach($disp_list as $key => $folder){
     }
 
     echo "<tr><td>";
-    $link = substr(realpath($folder),strlen(ROOT));
+    $link = getRelativePath(realpath($folder),WEB_ROOT_DIR);
     $disp_link = htmlspecialchars($link);
 
     if(is_dir($folder)){
@@ -246,12 +249,12 @@ foreach($disp_list as $key => $folder){
             if(($img = gettopimage($folder,3)) == NULL){
             //画像が存在しないときはディレクトリへのリンクを表示
             $key ++;
-            echo "<a href = \"/{$link}\"> ".$key.": {$disp_link}</a> (直近３階層ディレクトリ内画像なし)";
+            echo "<a href = \"/".webPathEncode($link)."\"> ".$key.": {$disp_link}</a> (直近３階層ディレクトリ内画像なし)";
             $key --;
             }
             else{
                 $key ++;
-                $imglink = substr(realpath($folder."/".$img),strlen(ROOT));
+                $imglink = webPathEncode(getRelativePath(realpath($folder."/".$img),WEB_ROOT_DIR));
                 //画像が存在する場合はimageshowに渡す
                 echo "<a href = \"./imageshow.php?path=".rawurlencode($link)."\"><img src=\"/{$imglink}\" ></a>";
                 echo "<br><a href = \"./imageshow.php?path=".rawurlencode($link)."\">".$key.": {$disp_link}</a>";
@@ -261,7 +264,7 @@ foreach($disp_list as $key => $folder){
     }elseif(is_picture($folder)){
         //画像の場合は表示して次へ
         $key ++;
-        $imglink = substr(realpath($folder),strlen(ROOT));
+        $imglink = webPathEncode(getRelativePath(realpath($folder),WEB_ROOT_DIR));
         echo "<img src=\"/{$imglink}\" >";
         echo "<br>".$key.": {$disp_link}";
         $key --;
@@ -273,7 +276,7 @@ foreach($disp_list as $key => $folder){
     }else{
         //画像以外のファイル
         $key ++;
-        echo "<a href = \"/{$link}\">".$key.": {$disp_link}</a>（ファイル）";
+        echo "<a href = \"/".webPathEncode($link)."\">".$key.": {$disp_link}</a>（ファイル）";
         $key --;
     }
     echo "<br>";
@@ -357,7 +360,7 @@ function print_tag(String $path,Array $addedtag_list){
 </div>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo"<p>タグ「".$nowcondition_str."」<p><br>\n";
 
 echo "<a href = \"./taglist.php\" >タグ一覧を表示</a><br>\n"

@@ -5,20 +5,23 @@
 <title>
 プレイリスト確認・編集画面
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/taglist.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
+<?php
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/taglist.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
 
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 
 echo"<h1>現在のプレイリスト</h1>\n";
 
@@ -34,7 +37,7 @@ set_error_handler(function($severity, $message) {
 });
 
 try{
-    $fp = fopen("/HTTP/data/playlist/nowplay.txt","rb");
+    $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
     $track_no = (int)substr(fgets($fp), 1);
     $music_list = fgetcsv($fp);
     fclose($fp);
@@ -56,8 +59,8 @@ echo "<div class=\"include_list\">\n";
 <p id="include_info_text" hidden></p>
 <select id="include_filename" hidden>
 <?php
-chdir(ROOT);
-$filelist = scandir("./HTTP/data/playlist");
+chdir(WEB_ROOT_DIR);
+$filelist = scandir(pathCombine(DATA_DIR,"/playlist"));
 //隠しファイルの削除
 $filelist = preg_grep('/^\..*/',$filelist,PREG_GREP_INVERT);
 natsort($filelist);
@@ -75,7 +78,7 @@ foreach($filelist as $file){
 </div>
 <?php
 
-chdir(ROOT); // ディレクトリ移動
+chdir(WEB_ROOT_DIR); // ディレクトリ移動
 
 echo "<h2>合計：".count($music_list)."曲</h2>\n";
 
@@ -145,7 +148,7 @@ foreach($addlist as $tag){
 <p><a href="#" onClick="window.close(); return false;">現在のタブを閉じる</a></p>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo"<p>プレイリスト確認・編集画面</p><br>\n";
 ?>
 </div>

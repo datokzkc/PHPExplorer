@@ -5,27 +5,30 @@
 <title>
 画像一覧(サブディレクトリ含む)
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/allshow.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
-<script type="text/javascript" src="../javascript/tagcont.js"></script>
+<?php
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/allshow.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/tagcont.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
 
 if(isset($_GET['path'])){
     $path = $_GET['path'];
 }else{
     $path = "."; //設定されていないときはルートディレクトリのパス
 }
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 $name = basename(realpath($path));
 echo"<h1>「{$name}」内の画像一覧(サブディレクトリ含む)</h1><br>\n";
 
@@ -34,7 +37,7 @@ echo "<a href = \"./covershow.php?path=".rawurlencode($path)."\"> 現在のデ�
 echo "<a href = \"./imageshow.php?path=".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
 echo "<a href = \"./alllistshow.php?path=".rawurlencode($path)."\"> リスト形式で表示</a><br>\n";
 echo "<a href = \"./slideshow.php?mode=all&path=".rawurlencode($path)."\"> スライドショー形式で表示</a><br>\n";
-if(realpath($path)==ROOT){
+if(realpath($path)==WEB_ROOT_DIR){
     //自身で設定したROOTより上に行くリンクも作成しない
 }else{
     echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
@@ -67,7 +70,7 @@ echo "<h2>合計：".count($list)."枚（画像以外のファイルなども含
 
 //タグ表示
 
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
@@ -113,22 +116,22 @@ echo realpath($path);
 chdir($path); // ディレクトリ移動
 
 foreach($list as $key => $img){
-    $link = substr(realpath($img),strlen(ROOT));
+    $link = getRelativePath(realpath($img),WEB_ROOT_DIR);
     if(is_dir($img)==TRUE){
         //ディレクトリの場合はpathを変更した自身のリンクを表示
         //<注意>このプログラムのままではディレクトリはすべてスキップされるため関係ない
-        echo "<a href = \"./".basename(__FILE__)."?path=".rawurlencode($path)."/".$img."\"> &lt; DIR &gt;：{$img} </a>";
+        echo "<a href = \"./".basename(__FILE__)."?path=".rawurlencode(pathCombine($path,$img))."\"> &lt; DIR &gt;：".htmlspecialchars($img)." </a>";
         echo "<br>\n";
     }else if(is_picture($img) == TRUE){
         //画像の時は画像を表示
-        echo "<img src=\"/{$link}\" >";
+        echo "<img src=\"/".webPathEncode($link)."\" >";
         echo "<br>{$key}：{$img}<br>\n";
     }else if(is_audio($img) || is_video($img)){
-        echo "<a href = \"./mediaplay.php?path=".rawurlencode($link)."\"> {$img} </a>：メディア再生ページに移動します";
+        echo "<a href = \"./mediaplay.php?path=".rawurlencode($link)."\"> ".htmlspecialchars($img)." </a>：メディア再生ページに移動します";
         echo "<br>\n";
     }
     else{
-        echo "<a href = \"/{$link}\"> {$img} </a>";
+        echo "<a href = \"/".webPathEncode($link)."\"> ".htmlspecialchars($img)." </a>";
         echo "<br>\n";
     }
 }
@@ -157,7 +160,7 @@ function list_files($dir){
 echo"<p>ディレクトリ名「{$name}」</p>\n";
 //タグ表示
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
     echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)." </a>　";
@@ -204,7 +207,7 @@ echo "<a href = \"./covershow.php?path=./".rawurlencode($path)."\"> 現在のデ
 echo "<a href = \"./imageshow.php?path=./".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
 echo "<a href = \"./alllistshow.php?path=".rawurlencode($path)."\"> リスト形式で表示</a><br>\n";
 echo "<a href = \"./slideshow.php?mode=all&path=".rawurlencode($path)."\"> スライドショー形式で表示</a><br>\n";
-if(realpath($path)==ROOT){
+if(realpath($path)==WEB_ROOT_DIR){
     //自身で設定したROOTより上に行くリンクも作成しない
 }else{
     echo "<a href = \"./imageshow.php?path=./".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";

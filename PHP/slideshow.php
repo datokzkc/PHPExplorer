@@ -5,22 +5,23 @@
 <title>
 画像表示(スライドショー型)
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/slideshow.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
-<script type="text/javascript" src="../javascript/tagcont.js"></script>
+<?php
+setlocale(LC_ALL, 'ja_JP.UTF-8');
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/slideshow.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/tagcont.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
+
 <?php
-setlocale(LC_ALL, 'ja_JP.UTF-8');
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
-
-
 if(isset($_GET['path'])){
     $path = $_GET['path'];
 }else{
@@ -36,7 +37,7 @@ if(isset($_GET['page'])){
 }else{
     $page = 1; //設定されていない場合は１ページから
 }
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 ?>
 <div class ="imageshow">
 <?php
@@ -55,8 +56,8 @@ if($list == null){
     exit();
 }
 //隠しファイルの削除
-$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
-$list = preg_grep('/^.*\\._.*/',$list,PREG_GREP_INVERT);
+$list = preg_grep('/^\..*/u',$list,PREG_GREP_INVERT);
+$list = preg_grep('/^.*\\._.*/u',$list,PREG_GREP_INVERT);
 chdir($path);
 $filelist = array();
 foreach($list as $file){
@@ -79,7 +80,7 @@ $list = array_values($filelist);
 
 //タグ表示(非表示)、消したらめんどくさいのでとりあえず
 
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo "<div class=\"tags\" hidden>\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
@@ -124,7 +125,7 @@ echo realpath($path);
 
 chdir($path); // ディレクトリ移動
 
-$link = mb_substr(realpath($list[($page - 1)]),mb_strlen(ROOT));
+$link = getRelativePath(realpath($list[($page - 1)]),WEB_ROOT_DIR);
 echo "<div class=\"imagebox\">\n";
 echo "<a href=\"./slideshow.php?mode=".$mode."&page=".($page + 1)."&path=".rawurlencode($path)."\"><img src=\"/".rawurlencode($link)."\" ></a>\n";
 echo "</div>\n";
@@ -139,7 +140,7 @@ echo "</div>\n";
 echo "<br>\n";
 echo "<p><a href=\"#\" onClick=\"history.back(); return false;\">前のページにもどる</a></p>\n";
 
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 
 //サブディレクトリ含めて全取得
 function list_files($dir){
@@ -162,12 +163,12 @@ function list_files($dir){
 </div>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 $name = basename(realpath($path));
 echo"<p>ディレクトリ名「{$name}」</p>\n";
 //タグ表示
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
     echo "<a href=\"./taggedlist.php?tag[]=".rawurlencode($tag)."\" class=\"tag\"> ".htmlspecialchars($tag)." </a>　";
@@ -232,7 +233,7 @@ echo "const this_path = " . json_encode(rawurlencode($path)) . ";\n";
 chdir($path);
 $img_urls = [];
 foreach($list as $img){
-    $link = mb_substr(realpath($img),mb_strlen(ROOT));
+    $link = getRelativePath(realpath($img),WEB_ROOT_DIR);
     $img_urls[] = rawurlencode($link);
 }
 echo "const img_list = " . json_encode($img_urls) . ";\n";

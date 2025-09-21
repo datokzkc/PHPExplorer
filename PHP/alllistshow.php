@@ -5,27 +5,29 @@
 <title>
 画像一覧リスト（サブディレクトリ含む）
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/covershow.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
-<script type="text/javascript" src="../javascript/tagcont.js"></script>
-</head>
+<?php
 
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+require_once 'search-class.php';
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/covershow.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/tagcont.js"))."\"></script>\n";
+echo "</head>\n";
+?>
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
-include 'search-class.php';
 
 if(isset($_GET['path'])){
     $path = $_GET['path'];
 }else{
     $path = "."; //設定されていないときはサイトルートのパス
 }
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 $name = basename(realpath($path));
 
 echo"<h1>「{$name}」内の画像一覧リスト(サブディレクトリ含む)</h1>\n";
@@ -33,7 +35,7 @@ echo"<h1>「{$name}」内の画像一覧リスト(サブディレクトリ含む
 echo "<a href = \"/{$path}\" >現在表示しているディレクトリへ移動(/{$path})</a><br>\n";
 echo "<a href = \"./imageshow.php?redirect=0&path=".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
 echo "<a href = \"./allshow.php?path=".rawurlencode($path)."\"> 画像一覧表示</a><br>\n";
-if(realpath($path)==ROOT){
+if(realpath($path)==WEB_ROOT_DIR){
     //自身で設定したROOTより上に行くリンクも作成しない
 }else{
     echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";
@@ -112,7 +114,7 @@ if($dirlist[0] != "\n--@//nothing"){
 
 echo "<h3>「".$name."」のタグ情報</h3>";
 //タグ表示
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo "<div class=\"tags\">\n<div class=\"tagshow\">\n";
 $tags = dir_tag_list(realpath($path));
 foreach($tags as $tag){
@@ -209,21 +211,21 @@ foreach($disp_list as $key => $folder){
     }
 
     echo "<tr><td>";
-    $link = substr(realpath($folder),strlen(ROOT));
+    $link = getRelativePath(realpath($folder),WEB_ROOT_DIR);
 
     if(is_picture($folder)){
         //画像の場合は表示して次へ
         $key ++;
-        $imglink = substr(realpath($folder),strlen(ROOT));
-        echo "<img src=\"/{$imglink}\" >";
-        echo "<br>".$key.": {$folder}<br>";
+        $imglink = getRelativePath(realpath($folder),WEB_ROOT_DIR);
+        echo "<img src=\"/".rawurlencode($imglink)."\" >";
+        echo "<br>".$key.": ".htmlspecialchars($folder)."<br>";
         $key --;
     }elseif(is_audio($folder)||is_video($folder)){
         //メディアの場合はメディア再生ページへのリンクを張る
         $key ++;
-        $imglink = substr(realpath($folder),strlen(ROOT));
+        $imglink = getRelativePath(realpath($folder),WEB_ROOT_DIR);
         echo "<a href=\"./mediaplay.php?path=".rawurlencode($imglink)."\" >";
-        echo "".$key.": {$folder}</a>(メディア再生ページへ)<br>";
+        echo "".$key.": ".htmlspecialchars($folder)."</a>(メディア再生ページへ)<br>";
         print_tag(realpath($folder));
         $key --;
     }
@@ -285,7 +287,7 @@ function print_tag(String $path){
 </div>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 $name = basename(realpath($path));
 
 echo"<p>表示ディレクトリ：".$name."</p>\n";
@@ -335,7 +337,7 @@ echo realpath($path);?>
 echo "<a href = \"/{$path}\" >現在表示しているディレクトリへ移動(/{$path})</a><br>\n";
 echo "<a href = \"./imageshow.php?redirect=0&path=".rawurlencode($path)."\"> 子ディレクトリの画像を含めない</a><br>\n";
 echo "<a href = \"./allshow.php?path=".rawurlencode($path)."\"> 画像一覧表示</a><br>\n";
-if(realpath($path)==ROOT){
+if(realpath($path)==WEB_ROOT_DIR){
     //自身で設定したROOTより上に行くリンクも作成しない
 }else{
     echo "<a href = \"./imageshow.php?path=".rawurlencode(dirname($path))."\"> 親ディレクトリへ（画像表示）</a><br>\n";

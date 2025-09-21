@@ -1,9 +1,9 @@
 <?php
 mb_internal_encoding("UTF-8");
 setlocale(LC_ALL, 'ja_JP.UTF-8');
-include 'db-func.php';
-include 'root_dir.php';
-include 'file-func.php';
+require_once 'db-func.php';
+require_once 'common-path.php';
+require_once 'file-func.php';
 
 if(isset($_POST['mode'])){
     $mode = $_POST['mode'];
@@ -11,7 +11,7 @@ if(isset($_POST['mode'])){
     echo 'FAIL TO AJAX REQUEST';
     exit();
 }
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 switch($mode){
     case "add":
         if(isset($_POST['path'])){
@@ -114,7 +114,7 @@ switch($mode){
         if($play_mode == "all_shuffle"){
             $music_list = all_dir_list();
             $next_trc = mt_rand(0,count($music_list)-1);
-            $next_path = substr(realpath($music_list[$next_trc]), strlen(ROOT));
+            $next_path = getRelativePath(realpath($music_list[$next_trc]), WEB_ROOT_DIR);
             echo "/".$next_path;
             exit();
         }
@@ -123,7 +123,7 @@ switch($mode){
             throw new ErrorException($message);
         });
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt") ,"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -148,7 +148,7 @@ switch($mode){
             echo $music_list[$track_no];
 
             //リストを作り直す
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
 
             if($is_nomal == true){
                 array_splice($music_list,$track_no,1);
@@ -190,7 +190,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -207,7 +207,7 @@ switch($mode){
         }
         $music_list[] = $path;
 
-        $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
 
         $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
         if(fwrite($fp,$write_str) == false){
@@ -233,7 +233,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/".$filename,"rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/".$filename),"rb");
             if(preg_match("/.*\.txt$/i",$filename) == 1){
                 $track_no = (int)substr(fgets($fp), 1);
                 $music_list = fgetcsv($fp);
@@ -252,7 +252,7 @@ switch($mode){
                     $bom = hex2bin('EFBBBF');
                     $line = preg_replace("/^$bom/", '', $line);
                     if(preg_match("/^#.*/",$line) == 0 && $line != ""){
-                        $line = substr($line, strlen(ROOT));
+                        $line = getRelativePath($line, WEB_ROOT_DIR);
                         $line = "/".$line;
                         $music_list[] = $line;
                     }
@@ -267,13 +267,14 @@ switch($mode){
             }
         }catch (Exception $e){
             //ファイルオープンエラー
-            echo "ERR";
+            echo "ERR\n";
+            echo $e->getMessage();
             return;
         }finally{
             restore_error_handler();
         }
 
-        $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
 
         $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
         if(fwrite($fp,$write_str) == false){
@@ -298,7 +299,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -314,7 +315,7 @@ switch($mode){
             restore_error_handler();
         }
 
-        $fp = fopen("./HTTP/data/playlist/".$filename,"wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/playlist/".$filename),"wb");
 
         $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
         if(fwrite($fp,$write_str) == false){
@@ -340,7 +341,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -361,7 +362,7 @@ switch($mode){
         }
         array_splice($music_list,$rm_track,1);
 
-        $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
 
         $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
         if(fwrite($fp,$write_str) == false){
@@ -381,7 +382,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -403,7 +404,7 @@ switch($mode){
             $track_no = -1;
         }
 
-        $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
 
         $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
         if(fwrite($fp,$write_str) == false){
@@ -430,7 +431,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"rb");
             $track_no = (int)substr(fgets($fp), 1);
             $music_list = fgetcsv($fp);
             fclose($fp);
@@ -447,7 +448,7 @@ switch($mode){
         $false_no = 0;
         foreach($music_list as $path){
             $path = substr($path, 1);
-            $path = substr(ROOT, 0,strlen(ROOT)-1)."\\".$path;
+            $path = pathCombine(WEB_ROOT_DIR, $path);
             if(add_dir_tag($path,$tag) == true){
                 $list = dir_tag_list($path);
                 if(in_array("全て",$list)== false){
@@ -486,7 +487,7 @@ switch($mode){
                 $dir_list = tagged_dir_list($tag,$notag);
                 $music_list = array();
                 foreach($dir_list as $line){
-                    $line = substr($line, strlen(ROOT));
+                    $line = getRelativePath($line, WEB_ROOT_DIR);
                     $line = "/".$line;
                     if(is_audio($line)){
                         $music_list[] = $line;
@@ -495,9 +496,8 @@ switch($mode){
             }
             $track_no = -1;
 
-    
-            $fp = fopen("./HTTP/data/playlist/nowplay.txt","wb");
-    
+            $fp = fopen(pathCombine(DATA_DIR,"/playlist/nowplay.txt"),"wb");
+
             $write_str = mb_convert_encoding("#".$track_no."\n", "UTF-8");
             if(fwrite($fp,$write_str) == false){
                 echo "ERR ";
@@ -522,7 +522,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/bookmark.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/bookmark.txt"),"rb");
             $bmlist = array();
             while (!feof($fp)) {
                 //改行削除
@@ -544,7 +544,7 @@ switch($mode){
         }
         $bmlist[] = $site;
 
-        $fp = fopen("./HTTP/data/bookmark.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/bookmark.txt"),"wb");
 
         foreach($bmlist as $bm){
             if($bm === end($bmlist)){
@@ -577,7 +577,7 @@ switch($mode){
         });
 
         try{
-            $fp = fopen("./HTTP/data/bookmark.txt","rb");
+            $fp = fopen(pathCombine(DATA_DIR,"/bookmark.txt"),"rb");
             $bmlist = array();
             while (!feof($fp)) {
                 //改行削除
@@ -600,7 +600,7 @@ switch($mode){
         unset($bmlist[array_search($site,$bmlist)]);
         array_merge($bmlist);
 
-        $fp = fopen("./HTTP/data/bookmark.txt","wb");
+        $fp = fopen(pathCombine(DATA_DIR,"/bookmark.txt"),"wb");
 
         foreach($bmlist as $bm){
             if($bm === end($bmlist)){

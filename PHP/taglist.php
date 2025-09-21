@@ -5,20 +5,23 @@
 <title>
 タグ一覧
 </title>
-<link rel="stylesheet" type="text/css" href="../CSS/taglist.css">
-<!-- jQuery -->
-<script type="text/javascript" src="../jquery-3.5.0.js"></script>
-<script type="text/javascript" src="../javascript/totop.js"></script>
+<?php
+require_once 'common-path.php';
+require_once 'db-func.php';
+require_once 'file-func.php';
+
+echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/taglist.css"))."\">\n";
+echo "<!-- jQuery -->\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PATH,"/javascript/totop.js"))."\"></script>\n";
+?>
 </head>
 
 <body>
 <div class ="header">
 <?php
-include 'root_dir.php';
-include 'db-func.php';
-include 'file-func.php';
 
-chdir(ROOT); //ディレクトリの場所の初期化
+chdir(WEB_ROOT_DIR); //ディレクトリの場所の初期化
 
 echo"<h1>タグ一覧</h1>\n";
 
@@ -48,7 +51,7 @@ if(isset($_GET['mode'])){
 $taglist = all_tag_list();
 //隠しファイルの削除
 //$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
-chdir(ROOT); // ディレクトリ移動
+chdir(WEB_ROOT_DIR); // ディレクトリ移動
 
 if($taglist == false){
     //何もないとき
@@ -113,7 +116,7 @@ foreach($taglist as $tag){
             if(is_dir($tagdirs[$top]) == FALSE){
                 if(is_audio($tagdirs[$top]) || is_video($tagldirs[$top])){
                     //メディアの場合はリンクで表示
-                    $medialink = substr(realpath($tagdirs[$top]), strlen(ROOT)); 
+                    $medialink = getRelativePath(realpath($tagdirs[$top]), WEB_ROOT_DIR); 
                     echo "<a href = \"./mediaplay.php?path=".rawurlencode($medialink)."\">Media:".htmlspecialchars(basename($tagdirs[$top]))."</a><br>";
                 }
             }
@@ -121,10 +124,10 @@ foreach($taglist as $tag){
                 //画像が存在しないときは画像表示はあきらめる
             }
             else{
-                $imglink = substr(realpath($tagdirs[$top]."/".$img),strlen(ROOT));
+                $imglink = getRelativePath(realpath($tagdirs[$top]."/".$img),WEB_ROOT_DIR);
                 //画像が存在する場合はimageshowに渡す
-                $dirlink = substr(realpath($tagdirs[$top]), strlen(ROOT)); 
-                echo "<a href = \"./imageshow.php?path=".rawurlencode($dirlink)."\"><img src=\"/{$imglink}\" ></a><br>";
+                $dirlink = getRelativePath(realpath($tagdirs[$top]),WEB_ROOT_DIR);
+                echo "<a href = \"./imageshow.php?path=".rawurlencode($dirlink)."\"><img src=\"/".webPathEncode($imglink)."\" ></a><br>";
             }
         }else{
             $listlong = 0;
@@ -158,7 +161,7 @@ function gettopimage(string $foldername,Int $num){
     }
     $stop = 10;
     foreach($list as $file){
-        if(preg_match('/^\..*/',$file)==TRUE){
+        if(preg_match('/^\..*/u',$file)==TRUE){
             continue; //ドットから始まるものはスキップ
         }
         $stop--;
@@ -190,7 +193,7 @@ function gettopimage(string $foldername,Int $num){
 <input id="cancel_btn" type="button" value="キャンセル" hidden>
 <div class="footer">
 <?php
-chdir(ROOT);
+chdir(WEB_ROOT_DIR);
 echo"<p>タグ一覧</p><br>\n";
 echo "<a href = \"./db_all.php\" >データベースに登録されているディレクトリ一覧</a><br>\n";
 ?>
