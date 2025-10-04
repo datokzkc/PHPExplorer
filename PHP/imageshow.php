@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>画像一覧表示</title>
 <?php
 setlocale(LC_ALL, 'ja_JP.UTF-8');
 require_once 'common-path.php';
@@ -10,6 +5,37 @@ require_once 'db-func.php';
 require_once 'file-func.php';
 require_once 'search-class.php';
 
+if(isset($_GET['path'])){
+    $path = $_GET['path'];
+}else{
+    $path = "."; //設定されていないときはルートディレクトリのパス
+}
+chdir(WEB_ROOT_DIR); // ディレクトリの場所の初期化
+
+$list = scandir($path);
+//隠しファイルの削除
+$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
+natsort($list);
+$list = array_values($list);
+
+if(isset($_GET['redirect'])){
+    $redir = $_GET['redirect'];
+}else{
+    $redir = 1; //設定されていないときはリダイレクトオン(1)
+}
+//内容が50枚以上の場合はcovershowへリダイレクト
+if($redir==1 && count($list) > 50){
+    header("Location: ./covershow.php?img=1&rawno=25&dirimg=0&path=".rawurlencode($path));
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>画像一覧表示</title>
+
+<?php
 echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".webPathEncode(pathCombine(BASE_PATH,"/CSS/imageshow.css"))."\">\n";
 echo "<!-- jQuery -->\n";
 echo "<script type=\"text/javascript\" src=\"".webPathEncode(JQUERY_FILE_PATH)."\"></script>\n";
@@ -21,12 +47,6 @@ echo "<script type=\"text/javascript\" src=\"".webPathEncode(pathCombine(BASE_PA
 <body>
 <div class ="header">
 <?php
-if(isset($_GET['path'])){
-    $path = $_GET['path'];
-}else{
-    $path = "."; //設定されていないときはルートディレクトリのパス
-}
-chdir(WEB_ROOT_DIR); // ディレクトリの場所の初期化
 $name = basename(realpath($path));
 echo"<h1>「{$name}」内の画像一覧</h1><br>\n";
 
@@ -55,22 +75,6 @@ if ($ptn_match_res != false && $ptn_match_res != 0){
 </div>
 <div class ="imageshow">
 <?php
-$list = scandir($path);
-//隠しファイルの削除
-$list = preg_grep('/^\..*/',$list,PREG_GREP_INVERT);
-natsort($list);
-$list = array_values($list);
-
-if(isset($_GET['redirect'])){
-    $redir = $_GET['redirect'];
-}else{
-    $redir = 1; //設定されていないときはリダイレクトオン(1)
-}
-//内容が50枚以上の場合はcovershowへリダイレクト
-if($redir==1 && count($list) > 50){
-    header("Location: ./covershow.php?img=1&rawno=25&dirimg=0&path=".rawurlencode($path));
-    exit;
-}
 
 echo "<h2>合計：".count($list)."枚（画像以外のファイルなども含む）</h2><br>\n";
 
